@@ -1,4 +1,6 @@
+/dist/
 /pkg/
 /src/
+bwlog
 *.db
 *.json
