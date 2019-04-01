@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // Return array of rx, tx from network interface
@@ -36,9 +35,4 @@ func readStats(nwIf string) (int64, int64, error) {
 	// fmt.Println(received, sent)
 
 	return received, sent, nil
-}
-
-func sqlDate() string {
-	currentTime := time.Now()
-	return currentTime.Format("2006-01-02")
 }

@@ -1,8 +1,10 @@
 package main
 
 import (
+	_ "./statik" // TODO: Replace with the absolute import path
 	"encoding/json"
 	"fmt"
+	"github.com/rakyll/statik/fs"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,6 +15,7 @@ type Config struct {
 	Interfaces []string `json:"if"`
 	Database   string   `json:"db"`
 	Save       int      `json:"save"`
+	Listen     string   `json:"listen"`
 }
 
 func main() {
@@ -32,15 +35,25 @@ func main() {
 	json.Unmarshal(byteValue, &config)
 
 	go func() {
-		http.HandleFunc("/", handler)
-		log.Fatal(http.ListenAndServe(":8080", nil))
+		// load static file FS
+		statikFS, err := fs.New()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// default http route (statik FS)
+		http.Handle("/", http.FileServer(statikFS))
+
+		// websocket route
+		http.HandleFunc("/stream", func(w http.ResponseWriter, r *http.Request) {
+			streamController(w, r, config)
+		})
+
+		fmt.Println(fmt.Sprintf("HTTP running on %s", config.Listen))
+
+		log.Fatal(http.ListenAndServe(config.Listen, nil))
 	}()
 
-	LogStats(config)
-
-	fmt.Println("ok")
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+	// Stats daemon
+	bwLogger(config)
 }

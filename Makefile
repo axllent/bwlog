@@ -1,14 +1,13 @@
 
 GOPATH := ${PWD}
 export GOPATH
-TAG=`git describe --tags`
-VERSION ?= `git describe --tags`
+VERSION ?= "dev"
 LDFLAGS=-ldflags "-s -w -X main.version=${VERSION}"
 
 bwlog: bwlog.go
-	if [ ! -d "src/github.com/bvinc/" ]; then go get github.com/bvinc/go-sqlite-lite/sqlite3; fi
+	if [ ! -d "src/" ]; then go get github.com/rakyll/statik github.com/bvinc/go-sqlite-lite/sqlite3 github.com/gorilla/websocket; fi
+	bin/statik -src=http/ -f
 	go build ${LDFLAGS}
 
 clean:
 	rm -rf pkg src bwlog
-
