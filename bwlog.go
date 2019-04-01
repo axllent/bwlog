@@ -2,37 +2,34 @@ package main
 
 import (
 	_ "./statik" // TODO: Replace with the absolute import path
-	"encoding/json"
 	"fmt"
 	"github.com/rakyll/statik/fs"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
+	"strings"
+	"flag"
 )
 
 type Config struct {
-	Interfaces []string `json:"if"`
-	Database   string   `json:"db"`
-	Save       int      `json:"save"`
-	Listen     string   `json:"listen"`
+	Interfaces []string
+	Database   string
+	Save       int
+	Listen     string
 }
 
 func main() {
-	jsonFile, err := os.Open("bwlog.json")
+	interfaces := flag.String("i", "eth0", "interfaces to monitor, comma separated")
+	listen := flag.String("l", ":8080", "port to listen on")
+	database := flag.String("d", "./bwlog.sqlite", "database path")
+	save := flag.Int("s", 60, "save to database every X seconds")
 
-	if err != nil {
-		fmt.Println(fmt.Errorf("Error: %s", err))
-		return
-	}
-
-	defer jsonFile.Close()
-
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	flag.Parse()
 
 	var config Config
-
-	json.Unmarshal(byteValue, &config)
+	config.Interfaces = strings.Split(*interfaces, ",")
+	config.Database = *database
+	config.Listen = *listen
+	config.Save = *save
 
 	go func() {
 		// load static file FS

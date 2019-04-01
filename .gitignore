@@ -1,3 +1,4 @@
+/.vscode/
 /bin/
 /dist/
 /pkg/
@@ -6,3 +7,4 @@
 bwlog
 *.db
 *.json
+*.sqlite
