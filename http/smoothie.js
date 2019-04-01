@@ -1002,15 +1002,39 @@
     }
 
     // Draw the axis values on the chart.
-    if (!chartOptions.labels.disabled && !isNaN(this.valueRange.min) && !isNaN(this.valueRange.max)) {
-      var maxValueString = chartOptions.yMaxFormatter(this.valueRange.max, chartOptions.labels.precision),
-          minValueString = chartOptions.yMinFormatter(this.valueRange.min, chartOptions.labels.precision),
-          maxLabelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - context.measureText(maxValueString).width - 2,
-          minLabelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - context.measureText(minValueString).width - 2;
-      context.fillStyle = chartOptions.labels.fillStyle;
-      context.fillText(maxValueString, maxLabelPos, chartOptions.labels.fontSize);
-      context.fillText(minValueString, minLabelPos, dimensions.height - 2);
-    }
+    // if (!chartOptions.labels.disabled && !isNaN(this.valueRange.min) && !isNaN(this.valueRange.max)) {
+    //   var maxValueString = chartOptions.yMaxFormatter(this.valueRange.max, chartOptions.labels.precision),
+    //       minValueString = chartOptions.yMinFormatter(this.valueRange.min, chartOptions.labels.precision),
+    //       maxLabelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - context.measureText(maxValueString).width - 2,
+    //       minLabelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - context.measureText(minValueString).width - 2;
+    //   context.fillStyle = chartOptions.labels.fillStyle;
+    //   context.fillText(maxValueString, maxLabelPos, chartOptions.labels.fontSize);
+    //   context.fillText(minValueString, minLabelPos, dimensions.height - 2);
+	// }
+
+	// modified patch from https://groups.google.com/forum/#!topic/smoothie-charts/7DcXTVffR5Q
+	if (!chartOptions.labels.disabled && !isNaN(this.valueRange.min) && !isNaN(this.valueRange.max)) {
+		var maxValueString = chartOptions.yMaxFormatter(this.valueRange.max, chartOptions.labels.precision),
+			minValueString = chartOptions.yMinFormatter(this.valueRange.min, chartOptions.labels.precision),
+			maxLabelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - context.measureText(maxValueString).width - 2,
+			minLabelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - context.measureText(minValueString).width - 2;
+
+		///// start of "values on axis" patch 1/2 -
+		// https://groups.google.com/forum/#!topic/smoothie-charts/7DcXTVffR5Q
+		var numSections = chartOptions.grid.verticalSections;
+		var deltaValue = (this.valueRange.max-this.valueRange.min) / numSections;
+		var deltaValueString = "";
+		//// end of "values on axis" patch 1/2
+
+		context.fillStyle = chartOptions.labels.fillStyle;
+		context.fillText(maxValueString, maxLabelPos, chartOptions.labels.fontSize);
+		context.fillText(minValueString, minLabelPos, dimensions.height - 2);
+		//// start "values on axis" patch 2/2
+		for (var i = 1; i < numSections; i++) {
+			deltaValueString = parseFloat(this.valueRange.max -i*deltaValue).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,');
+			context.fillText(deltaValueString, dimensions.width - context.measureText(deltaValueString).width - 2, parseFloat(dimensions.height*i/numSections - 2).toFixed(0));
+		}
+	}
 
     // Display intermediate y axis labels along y-axis to the left of the chart
     if ( chartOptions.labels.showIntermediateLabels

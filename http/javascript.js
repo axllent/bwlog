@@ -25,14 +25,14 @@ $(function () {
 
 		charts[ifname] = new SmoothieChart({
 			millisPerPixel:100,
-			maxValueScale:1.1,
+			maxValueScale:1.0,
 			tooltip:true,
 			responsive: true,
 			grid:{
-				fillStyle:'rgba(0,0,0,0.88)',
-				strokeStyle:'rgba(0,0,0,0.88)',
-				verticalSections:10,
-				verticalSections:5
+				fillStyle: 'rgba(0,0,0,0.88)',
+				strokeStyle: 'rgba(0,0,0,0.88)',
+				verticalSections: 10,
+				verticalSections: 5
 			},
 			yMinFormatter: function(min, precision) { // callback function that formats the min y value label
 				return parseFloat(min).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s';
@@ -42,7 +42,7 @@ $(function () {
 			},
 			yIntermediateFormatter: function(intermediate, precision) { // callback function that formats the intermediate y value labels
 				return parseFloat(intermediate).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s';
-			},
+			}
 		});
 
 		var canvas = document.getElementById('chart_' + ifname)
