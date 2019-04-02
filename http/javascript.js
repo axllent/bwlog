@@ -63,6 +63,7 @@ $(function () {
 		var ws = new WebSocket("ws://" + document.location.host + "/stream");
 
 		ws.onmessage = function (event) {
+			$('#Led').addClass('connected');
 			var obj = JSON.parse(event.data);
 			$(obj).each(function (k, nw) {
 				if (charts[nw.If] == undefined) {
@@ -80,6 +81,7 @@ $(function () {
 		}
 
 		ws.onclose = function (e) {
+			$('#Led').removeClass('connected');
 			setTimeout(function () {
 				// reconnect
 				connect();

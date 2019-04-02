@@ -83,3 +83,16 @@ span.tx {
 .nav-tabs .nav-link.disabled {
 	color: #fff;
 }
+
+
+#Led {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: red;
+	margin-right: 5px;
+}
+#Led.connected {
+	background: #00ff00;
+}
