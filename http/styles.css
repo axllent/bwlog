@@ -1,3 +1,44 @@
+/*
+ * Globals
+ */
+
+/* Links */
+a,
+a:focus,
+a:hover {
+  color: #fff;
+}
+
+/* Custom default button */
+.btn-secondary,
+.btn-secondary:hover,
+.btn-secondary:focus {
+  color: #333;
+  text-shadow: none; /* Prevent inheritance from `body` */
+  background-color: #fff;
+  border: .05rem solid #fff;
+}
+
+
+/*
+ * Base structure
+ */
+
+html,
+body {
+  height: 100%;
+  background-color: #333;
+}
+
+body {
+  color: #fff;
+}
+
+.container-fluid {
+	max-width: 1200px;
+	margin: auto;
+}
+
 div.smoothie-chart-tooltip {
 	background: #444;
 	padding: 1em;
@@ -12,16 +53,33 @@ div.smoothie-chart-tooltip {
 .smoothie-chart {
 	width: 100%;
 	height: 300px;
-	margin: 30px 0;
+	margin: 0 0 30px;
 }
 
 .tab-content > .tab-pane {
 	display: block;
 	position: absolute;
 	left: -999em;
+	top: 0;
 }
 
 .tab-content > .active {
 	position: relative;
 	left: 0;
+}
+
+.nav-link.hdr {
+	margin-bottom: -1px;
+}
+
+
+span.rx {
+	color: #00ff00;
+}
+span.tx {
+	color: #ff0018;
+}
+
+.nav-tabs .nav-link.disabled {
+	color: #fff;
 }

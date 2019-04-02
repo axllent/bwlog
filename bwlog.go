@@ -2,12 +2,12 @@ package main
 
 import (
 	_ "./statik" // TODO: Replace with the absolute import path
+	"flag"
 	"fmt"
 	"github.com/rakyll/statik/fs"
 	"log"
 	"net/http"
 	"strings"
-	"flag"
 )
 
 type Config struct {

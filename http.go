@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/websocket"
+	"log"
 	"net/http"
 	"time"
 )
@@ -14,25 +14,20 @@ type JsonReturn struct {
 	Tx int64
 }
 
-func rootController(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-}
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
 
 func streamController(w http.ResponseWriter, r *http.Request, config Config) {
-	conn, err := upgrader.Upgrade(w, r, nil) // error ignored for sake of simplicity
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		if _, ok := err.(websocket.HandshakeError); !ok {
-			// not a websocket request
-			fmt.Println(err)
+			log.Print(err)
 		}
 		return
 	}
-	fmt.Println("+ Client connected")
+	log.Print("Websocket connected")
 	wsReader(conn, config)
 }
 
@@ -56,7 +51,7 @@ func wsReader(ws *websocket.Conn, config Config) {
 	ticker := time.NewTicker(1000 * time.Millisecond)
 
 	defer func() {
-		fmt.Println("- Client disconnected")
+		log.Print("Websocket disconnected")
 		ticker.Stop()
 		ws.Close()
 	}()
@@ -77,7 +72,6 @@ func wsReader(ws *websocket.Conn, config Config) {
 				output[i] = m
 			}
 		}
-		fmt.Println("> Sending ws response")
 
 		b, _ := json.Marshal(output)
 		if err := ws.WriteMessage(websocket.TextMessage, b); err != nil {
@@ -85,36 +79,3 @@ func wsReader(ws *websocket.Conn, config Config) {
 		}
 	}
 }
-
-// func socketController(w http.ResponseWriter, r *http.Request, config Config) {
-// 	conn, err := upgrader.Upgrade(w, r, nil) // error ignored for sake of simplicity
-// 	if err != nil {
-// 		if _, ok := err.(websocket.HandshakeError); !ok {
-// 			// not a websocket request
-// 			fmt.Println(err)
-// 		}
-// 		return
-// 	}
-
-// 	for {
-// 		// Read message from browser
-// 		_, msg, err := conn.ReadMessage()
-// 		if err != nil {
-// 			return
-// 		}
-
-// 		// Print the message to the console
-// 		fmt.Printf("%s sent: %s\n", conn.RemoteAddr(), string(msg))
-// 		fmt.Printf("sent: %s\n", config.Database)
-
-// 		// Write message back to browser
-// 		response := []byte(fmt.Sprintf("You wrote: %s", msg))
-
-// 		if err = conn.WriteMessage(websocket.TextMessage, response); err != nil {
-// 			return
-// 		}
-// 		// if err = conn.WriteMessage(msgType, msg); err != nil {
-// 		// 	return
-// 		// }
-// 	}
-// }

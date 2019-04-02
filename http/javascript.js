@@ -8,10 +8,13 @@ $(function () {
 			'data-toggle="tab" href="#' + ifname + '" role="tab" ' +
 			'aria-controls="' + ifname + '">' + ifname + '</a>'
 		);
-		$('#nwtabs').append(tab);
+		// $('#nwtabs').append(tab);
+		tab.insertBefore('#nwtabs .header')
 
-		var tabcontent = $('<div class="tab-pane" id="' + ifname + '" '+
-			'role="tabpanel" aria-labelledby="' + ifname + '-tab">'
+		var tabcontent = $('<div class="tab-pane fade" id="' + ifname + '" ' +
+			'role="tabpanel" aria-labelledby="' + ifname + '-tab">' +
+			'<p class="float-right mt-2 mb-0"><small id="CurStats' + ifname + '">' +
+			'<h3 class="mt-2 mb-0">' + ifname + '</h3>'
 		);
 
 		$('#nwinfo').append(tabcontent);
@@ -21,26 +24,28 @@ $(function () {
 		tabcontent.append(canv);
 
 		// open first tab
-		$('#nwtabs li:first-child a').tab('show');
+		$('#nwtabs a').first().tab('show');
 
 		charts[ifname] = new SmoothieChart({
-			millisPerPixel:100,
-			maxValueScale:1.0,
-			tooltip:true,
+			millisPerPixel: 100,
+			maxValueScale: 1.0,
+			tooltip: true,
 			responsive: true,
-			grid:{
-				fillStyle: 'rgba(0,0,0,0.88)',
-				strokeStyle: 'rgba(0,0,0,0.88)',
+			grid: {
+				// fillStyle: 'rgba(0,0,0,0.88)',
+				// strokeStyle: 'rgba(0,0,0,0.88)',
+				fillStyle: '#333333',
+				strokeStyle: 'rgba(255,255,255,0.1)',
 				verticalSections: 10,
 				verticalSections: 5
 			},
-			yMinFormatter: function(min, precision) { // callback function that formats the min y value label
+			yMinFormatter: function (min, precision) { // callback function that formats the min y value label
 				return parseFloat(min).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s';
 			},
-			yMaxFormatter: function(max, precision) { // callback function that formats the max y value label
+			yMaxFormatter: function (max, precision) { // callback function that formats the max y value label
 				return parseFloat(max).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s';
 			},
-			yIntermediateFormatter: function(intermediate, precision) { // callback function that formats the intermediate y value labels
+			yIntermediateFormatter: function (intermediate, precision) { // callback function that formats the intermediate y value labels
 				return parseFloat(intermediate).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s';
 			}
 		});
@@ -49,8 +54,8 @@ $(function () {
 		charts[ifname + '_rx'] = new TimeSeries();
 		charts[ifname + '_tx'] = new TimeSeries();
 
-		charts[ifname].addTimeSeries(charts[ifname + '_rx'], {lineWidth:2,strokeStyle:'#00ff00'});
-		charts[ifname].addTimeSeries(charts[ifname + '_tx'], {lineWidth:2,strokeStyle:'#ff0018'});
+		charts[ifname].addTimeSeries(charts[ifname + '_rx'], { lineWidth: 2, strokeStyle: '#00ff00' });
+		charts[ifname].addTimeSeries(charts[ifname + '_tx'], { lineWidth: 2, strokeStyle: '#ff0018' });
 		charts[ifname].streamTo(canvas, 500);
 	}
 
@@ -59,29 +64,29 @@ $(function () {
 
 		ws.onmessage = function (event) {
 			var obj = JSON.parse(event.data);
-			$("#output").empty();
-			table = $('<table>', { 'class': 'table' });
-			table.append('<tr><th>Interface</td><th>Download</th><th>Upload</th></tr>');
 			$(obj).each(function (k, nw) {
-				if (charts[nw.If] == undefined ) {
+				if (charts[nw.If] == undefined) {
 					setupchart(nw.If);
 				}
 				charts[nw.If + '_rx'].append(new Date().getTime(), nw.Rx);
 				charts[nw.If + '_tx'].append(new Date().getTime(), nw.Tx);
-				table.append('<tr><td>' + nw.If + '</td><td>' + nw.Rx + '</td><td>' + nw.Tx + '</td></tr>');
+
+				$('#CurStats' + nw.If).html(
+					'<span class="rx">' + nw.Rx + ' kB/s</span> / ' +
+					'<span class="tx">' + nw.Tx + ' kB/s</span>'
+				);
 			})
 			$("#output").append(table)
 		}
 
 		ws.onclose = function (e) {
-			// console.log('Socket is closed. Reconnect will be attempted in 3 seconds.', e.reason);
 			setTimeout(function () {
+				// reconnect
 				connect();
 			}, 3000);
 		};
 
 		ws.onerror = function (err) {
-			// console.error('Socket encountered error: ', err.message, 'Closing socket');
 			ws.close();
 		}
 	}
