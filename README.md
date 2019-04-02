@@ -9,7 +9,7 @@ Usage of bwlog:
   -i string
         interfaces to monitor, comma separated (default "eth0")
   -l string
-        port to listen on (default ":8080")
+        port to listen on (default "0.0.0.0:8080")
   -s int
         save to database every X seconds (default 60)
 ```

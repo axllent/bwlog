@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "./statik" // TODO: Replace with the absolute import path
+	_ "./statik"
 	"flag"
 	"fmt"
 	"github.com/rakyll/statik/fs"
@@ -19,7 +19,7 @@ type Config struct {
 
 func main() {
 	interfaces := flag.String("i", "eth0", "interfaces to monitor, comma separated")
-	listen := flag.String("l", ":8080", "port to listen on")
+	listen := flag.String("l", "0.0.0.0:8080", "port to listen on")
 	database := flag.String("d", "./bwlog.sqlite", "database path")
 	save := flag.Int("s", 60, "save to database every X seconds")
 
