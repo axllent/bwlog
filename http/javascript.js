@@ -13,8 +13,8 @@ $(function () {
 
 		var tabcontent = $('<div class="tab-pane fade" id="' + ifname + '" ' +
 			'role="tabpanel" aria-labelledby="' + ifname + '-tab">' +
-			'<p class="float-right mt-2 mb-0"><small id="CurStats' + ifname + '">' +
-			'<h3 class="mt-2 mb-0">' + ifname + '</h3>'
+			'<p class="float-right my-1"><small id="CurStats' + ifname + '">' +
+			'<h3 class="my-2">' + ifname + '</h3>'
 		);
 
 		$('#nwinfo').append(tabcontent);
@@ -32,8 +32,6 @@ $(function () {
 			tooltip: true,
 			responsive: true,
 			grid: {
-				// fillStyle: 'rgba(0,0,0,0.88)',
-				// strokeStyle: 'rgba(0,0,0,0.88)',
 				fillStyle: '#333333',
 				strokeStyle: 'rgba(255,255,255,0.1)',
 				verticalSections: 10,
