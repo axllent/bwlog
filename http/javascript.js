@@ -71,8 +71,8 @@ $(function () {
 				charts[nw.If + '_tx'].append(new Date().getTime(), nw.Tx);
 
 				$('#CurStats' + nw.If).html(
-					'<span class="rx">' + nw.Rx + ' kB/s</span> / ' +
-					'<span class="tx">' + nw.Tx + ' kB/s</span>'
+					'<span class="rx">' + parseFloat(nw.Rx).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s</span> / ' +
+					'<span class="tx">' + parseFloat(nw.Tx).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s</span>'
 				);
 			})
 			$("#output").append(table)
