@@ -45,11 +45,15 @@ div.smoothie-chart-tooltip {
   position: absolute;
   left: -999em;
   top: 0;
+  height: 500px;
+  overflow: hidden;
 }
 
 .tab-content > .active {
   position: relative;
   left: 0;
+  overflow: initial;
+  height: auto;
 }
 
 .nav-link.hdr {

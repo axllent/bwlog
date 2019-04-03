@@ -1,3 +1,5 @@
+//go:generate statik -src=./http
+
 package main
 
 import (
