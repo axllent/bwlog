@@ -6,12 +6,21 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"fmt"
+	"regexp"
+	"github.com/bvinc/go-sqlite-lite/sqlite3"
 )
 
 type JsonReturn struct {
 	If string
 	Rx int64
 	Tx int64
+}
+
+type Statistic struct {
+	Date string
+	RX	 int64
+	TX	 int64
 }
 
 var upgrader = websocket.Upgrader{
@@ -78,4 +87,82 @@ func wsReader(ws *websocket.Conn, config Config) {
 			return
 		}
 	}
+}
+
+// Handles /stats/<nwif>/(<date>)?
+func statsController(w http.ResponseWriter, r *http.Request, config Config) {
+	re, _ := regexp.Compile(`/stats/([a-z0-9\-]+)/?(\d\d\d\d\-\d\d)?`)
+	matches := re.FindStringSubmatch(r.URL.String())
+
+	if len(matches) == 0 {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - invalid URL!"))
+		return
+	}
+
+	nwif := string(matches[1])
+
+	if !in_array(nwif, config.Interfaces) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - unknown interface!"))
+	}
+
+	stats_month := string(matches[2]);
+
+	conn, _ := sqlite3.Open(config.Database)
+
+	defer conn.Close()
+
+	var stats []Statistic
+	var stmt *sqlite3.Stmt
+
+	fmt.Println(matches)
+
+
+	if stats_month != "" {
+		// daily stats
+		month := string(matches[2]) + "%"
+		stmt, _ = conn.Prepare(`SELECT Day, RX, TX FROM Daily WHERE Interface = ? AND Day LIKE ? ORDER BY Day DESC`, nwif, month)
+	} else {
+		// monthlt stats
+		stmt, _ = conn.Prepare(`SELECT Month, RX, TX FROM Monthly WHERE Interface = ? ORDER BY Month DESC`, nwif)
+	}
+
+	for {
+		hasRow, _ := stmt.Step()
+		if !hasRow {
+			// The query is finished
+			break
+		}
+
+		var month string
+		var rx int64
+		var tx int64
+		stmt.Scan(&month, &rx, &tx)
+
+		stats = append(stats, Statistic{
+			Date: month,
+			RX:    rx,
+			TX:    tx,
+		})
+	}
+
+	results, err := json.Marshal(stats)
+    if err != nil {
+        log.Fatal("Cannot encode to JSON ", err)
+    }
+
+	// fmt.Println(string(results))
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "%s", string(results))
+}
+
+// php-like in_array() function
+func in_array(x string, a []string) bool {
+    for _, n := range a {
+        if x == n {
+            return true
+        }
+    }
+    return false
 }

@@ -9,7 +9,12 @@ body {
   background-color: #333;
 }
 
-body {
+html {
+	overflow-y: scroll;
+}
+
+body,
+.table {
   color: #fff;
 }
 
@@ -55,7 +60,7 @@ span.rx {
   color: #00ff00;
 }
 span.tx {
-  color: #ff0018;
+  color: #00edff;
 }
 
 .nav-tabs .nav-link.disabled {
@@ -67,7 +72,7 @@ span.tx {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: red;
+  background: #b10303;
   margin-right: 5px;
 }
 #Led.connected {

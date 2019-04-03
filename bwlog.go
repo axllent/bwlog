@@ -41,6 +41,11 @@ func main() {
 		// default http route (statik FS)
 		http.Handle("/", http.FileServer(statikFS))
 
+		// stats controller
+		http.HandleFunc("/stats/", func(w http.ResponseWriter, r *http.Request) {
+			statsController(w, r, config)
+		})
+
 		// websocket route
 		http.HandleFunc("/stream", func(w http.ResponseWriter, r *http.Request) {
 			streamController(w, r, config)

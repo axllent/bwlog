@@ -8,8 +8,7 @@ $(function () {
 			'data-toggle="tab" href="#' + ifname + '" role="tab" ' +
 			'aria-controls="' + ifname + '">' + ifname + '</a>'
 		);
-		// $('#nwtabs').append(tab);
-		tab.insertBefore('#nwtabs .header')
+		tab.insertBefore('#nwtabs .header');
 
 		var tabcontent = $('<div class="tab-pane fade" id="' + ifname + '" ' +
 			'role="tabpanel" aria-labelledby="' + ifname + '-tab">' +
@@ -22,6 +21,17 @@ $(function () {
 		var canv = $('<canvas>', { 'id': 'chart_' + ifname, 'class': 'smoothie-chart' });
 
 		tabcontent.append(canv);
+
+		var day_stats = $('<div class="col-md-6"><h4>Daily totals</h4><div id="DayStats' + ifname + '"></div></div>');
+		var month_stats = $('<div class="col-md-6"><h4>Monthly totals</h4><div id="MonthStats' + ifname + '"></div></div>');
+
+		var stats_row = $('<div class="row">');
+		stats_row.append(day_stats);
+		stats_row.append(month_stats);
+		tabcontent.append(stats_row);
+
+		refreshMonthly(ifname);
+
 
 		// open first tab
 		$('#nwtabs a').first().tab('show');
@@ -37,14 +47,14 @@ $(function () {
 				verticalSections: 10,
 				verticalSections: 5
 			},
-			yMinFormatter: function (min, precision) { // callback function that formats the min y value label
-				return parseFloat(min).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s';
+			yMinFormatter: function (min, precision) {
+				return 0;
 			},
-			yMaxFormatter: function (max, precision) { // callback function that formats the max y value label
-				return parseFloat(max).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s';
+			yMaxFormatter: function (max, precision) {
+				return humanFileSize(max, 1024) + '/s';
 			},
-			yIntermediateFormatter: function (intermediate, precision) { // callback function that formats the intermediate y value labels
-				return parseFloat(intermediate).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s';
+			yIntermediateFormatter: function (intermediate, precision) {
+				return humanFileSize(intermediate, 1024) + '/s';
 			}
 		});
 
@@ -52,9 +62,25 @@ $(function () {
 		charts[ifname + '_rx'] = new TimeSeries();
 		charts[ifname + '_tx'] = new TimeSeries();
 
-		charts[ifname].addTimeSeries(charts[ifname + '_rx'], { lineWidth: 2, strokeStyle: '#00ff00' });
-		charts[ifname].addTimeSeries(charts[ifname + '_tx'], { lineWidth: 2, strokeStyle: '#ff0018' });
+		charts[ifname].addTimeSeries(charts[ifname + '_rx'], { lineWidth: 2, strokeStyle: '#00ff00'/*, fillStyle:'rgba(0,255,0,0.15)'*/ });
+		charts[ifname].addTimeSeries(charts[ifname + '_tx'], { lineWidth: 2, strokeStyle: '#00edff'/*, fillStyle:'rgba(0,237,255,0.15)'*/ });
 		charts[ifname].streamTo(canvas, 500);
+	}
+
+	function humanFileSize(bytes, si) {
+		var thresh = si ? 1000 : 1024;
+		if(Math.abs(bytes) < thresh) {
+			return bytes + ' kB/s';
+		}
+		var units = si
+			? ['MB','GB','TB']
+			: ['MiB','GiB','TiB'];
+		var u = -1;
+		do {
+			bytes /= thresh;
+			++u;
+		} while(Math.abs(bytes) >= thresh && u < units.length - 1);
+		return bytes.toFixed(1)+' '+units[u];
 	}
 
 	function connect() {
@@ -71,11 +97,10 @@ $(function () {
 				charts[nw.If + '_tx'].append(new Date().getTime(), nw.Tx);
 
 				$('#CurStats' + nw.If).html(
-					'<span class="rx">' + parseFloat(nw.Rx).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s</span> / ' +
-					'<span class="tx">' + parseFloat(nw.Tx).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,') + ' kB/s</span>'
+					'<span class="rx">' + humanFileSize(nw.Rx, 1024) + '</span> / ' +
+					'<span class="tx">' + humanFileSize(nw.Tx, 1024) + '</span>'
 				);
-			})
-			$("#output").append(table)
+			});
 		}
 
 		ws.onclose = function (e) {
@@ -92,4 +117,26 @@ $(function () {
 	}
 
 	connect();
+
+	function refreshMonthly(nwif) {
+		$.getJSON('/stats/' + nwif, function( data ) {
+			$('#MonthStats' + nwif).empty();
+			var table = $('<table>', {class: 'table'});
+			var ths = $('<tr><th>Month</th><th class="text-right">Downloaded</th><th class="text-right">Uploaded</th></tr>')
+			table.append(ths);
+			$.each( data, function(idx, vals) {
+				console.log(vals);
+				var tr = $('<tr>');
+				table.append(tr);
+				var td = $('<td>' + vals.Date + '</td>');
+				tr.append(td);
+				var td = $('<td class="text-right">' + humanFileSize(vals.RX, 1024) + '</td>');
+				tr.append(td);
+				var td = $('<td class="text-right">' + humanFileSize(vals.TX, 1024) + '</td>');
+				tr.append(td);
+			});
+
+			$('#MonthStats' + nwif).append(table);
+		});
+	}
 });

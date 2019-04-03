@@ -1031,7 +1031,12 @@
 		context.fillText(minValueString, minLabelPos, dimensions.height - 2);
 		//// start "values on axis" patch 2/2
 		for (var i = 1; i < numSections; i++) {
-			deltaValueString = parseFloat(this.valueRange.max -i*deltaValue).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,');
+			var deltaValueString = chartOptions.yMaxFormatter(
+				parseFloat(this.valueRange.max -i*deltaValue).toFixed(0),
+				chartOptions.labels.precision
+			)
+
+			// deltaValueString = parseFloat(this.valueRange.max -i*deltaValue).toFixed(0).replace(/\d(?=(\d{3})+)/g, '$&,');
 			context.fillText(deltaValueString, dimensions.width - context.measureText(deltaValueString).width - 2, parseFloat(dimensions.height*i/numSections - 2).toFixed(0));
 		}
 	}

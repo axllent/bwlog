@@ -52,7 +52,7 @@ func bwLogger(config Config) {
 				in := (rx - stats[i][0]) / 1024
 				out := (tx - stats[i][1]) / 1024
 
-				if in > 0 && out > 0 {
+				if in > 0 || out > 0 {
 					// fmt.Println("+ Logging", config.Interfaces[i], in, out)
 					// Daily totals
 					err = conn.Exec(`INSERT OR IGNORE INTO Daily
@@ -64,9 +64,13 @@ func bwLogger(config Config) {
 						continue
 					}
 					// Monthly totals
-					conn.Exec(`INSERT OR IGNORE INTO Monthly VALUES(?, ?, 0, 0)
+					err = conn.Exec(`INSERT OR IGNORE INTO Monthly VALUES(?, ?, 0, 0)
 						ON CONFLICT(Month, Interface) DO UPDATE SET RX=RX+?, TX=TX+?`,
 						sqlMonth, config.Interfaces[i], in, out)
+					if err != nil {
+						fmt.Println(err)
+						continue
+					}
 				}
 
 				// set new totals
