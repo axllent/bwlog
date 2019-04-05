@@ -6,5 +6,5 @@ github.com/bvinc/go-sqlite-lite/sqlite3 \
 github.com/gorilla/websocket
 
 # Regenerate static files
-bin/statik -src=http/ -f
+bin/statik -src=web/ -f
 CGO_ENABLED=1 go run *.go $@

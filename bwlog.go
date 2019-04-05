@@ -17,11 +17,14 @@ type Config struct {
 	Listen     string
 }
 
+var version = "dev"
+
 func main() {
 	interfaces := flag.String("i", "eth0", "interfaces to monitor, comma separated")
 	listen := flag.String("l", "0.0.0.0:8080", "port to listen on")
 	database := flag.String("d", "./bwlog.sqlite", "database path")
 	save := flag.Int("s", 60, "save to database every X seconds")
+	showversion := flag.Bool("v", false, "show version number")
 
 	flag.Parse()
 
@@ -30,6 +33,11 @@ func main() {
 	config.Database = *database
 	config.Listen = *listen
 	config.Save = *save
+
+	if *showversion {
+		fmt.Println(fmt.Sprintf("Version: %s", version))
+		return
+	}
 
 	go func() {
 		// load static file FS
