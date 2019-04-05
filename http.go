@@ -2,13 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/bvinc/go-sqlite-lite/sqlite3"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
-	"time"
-	"fmt"
 	"regexp"
-	"github.com/bvinc/go-sqlite-lite/sqlite3"
+	"time"
 )
 
 type JsonReturn struct {
@@ -19,8 +19,8 @@ type JsonReturn struct {
 
 type Statistic struct {
 	Date string
-	RX	 int64
-	TX	 int64
+	RX   int64
+	TX   int64
 }
 
 var upgrader = websocket.Upgrader{
@@ -106,7 +106,7 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 		w.Write([]byte("500 - unknown interface!"))
 	}
 
-	stats_month := string(matches[2]);
+	stats_month := string(matches[2])
 
 	conn, _ := sqlite3.Open(config.Database)
 
@@ -140,15 +140,15 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 
 		stats = append(stats, Statistic{
 			Date: month,
-			RX:    rx,
-			TX:    tx,
+			RX:   rx,
+			TX:   tx,
 		})
 	}
 
 	results, err := json.Marshal(stats)
-    if err != nil {
-        log.Fatal("Cannot encode to JSON ", err)
-    }
+	if err != nil {
+		log.Fatal("Cannot encode to JSON ", err)
+	}
 
 	// fmt.Println(string(results))
 	w.Header().Set("Content-Type", "application/json")
@@ -157,10 +157,10 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 
 // php-like in_array() function
 func in_array(x string, a []string) bool {
-    for _, n := range a {
-        if x == n {
-            return true
-        }
-    }
-    return false
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
 }

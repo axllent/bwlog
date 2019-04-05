@@ -100,6 +100,24 @@ $(function () {
 					'<span class="rx">' + humanFileSize(nw.Rx, 1024) + '</span> / ' +
 					'<span class="tx">' + humanFileSize(nw.Tx, 1024) + '</span>'
 				);
+
+				$('#' + nw.If + ' tr.live-stat').each(function(){
+					var rx = $(this).find('td[data-rx]').first();
+					var tx = $(this).find('td[data-tx]').first();
+					var total = $(this).find('td[data-total]').first();
+
+					var new_rx = rx.data('rx') + nw.Rx;
+					rx.html(humanFileSize(new_rx, 1024));
+					rx.data('rx', new_rx);
+
+					var new_tx = tx.data('tx') + nw.Tx;
+					tx.html(humanFileSize(new_tx, 1024));
+					tx.data('tx', new_tx);
+
+					var new_total = humanFileSize(new_rx + new_tx, 1024);
+					total.html(new_total)
+
+				});
 			});
 		}
 
@@ -118,6 +136,9 @@ $(function () {
 	connect();
 
 	function loadMonthlyStats(nwif, highlight = false) {
+		var MyDate = new Date();
+		var cur_date = MyDate.getFullYear() + '-' + ('0' + (MyDate.getMonth()+1)).slice(-2);
+
 		$.getJSON('/stats/' + nwif, function (data) {
 			var fresh_start = $('#MonthStats' + nwif).is(':empty');
 			if (!fresh_start) {
@@ -131,6 +152,9 @@ $(function () {
 
 			$.each(data, function (idx, vals) {
 				var tr = $('<tr>', {class: 'clickable ' + vals.Date});
+				if (vals.Date == cur_date) {
+					tr.addClass('live-stat');
+				}
 				tr.data('month', vals.Date);
 				tr.on('clickload', function() {
 					$(this).parent().find('tr').removeClass('table-active');
@@ -142,18 +166,15 @@ $(function () {
 						scrollTop: $("#StatsTop").offset().top
 					}, 500);
 					$(this).trigger('clickload');
-					// $(this).parent().find('tr').removeClass('table-active');
-					// $(this).addClass('table-active');
-					// loadDaily(nwif, $(this).data('month'));
 				});
 				tbody.append(tr);
 				var td = $('<td>' + vals.Date + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right">' + humanFileSize(vals.RX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-rx="' + vals.RX + '">' + humanFileSize(vals.RX, 1024) + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right">' + humanFileSize(vals.TX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-tx="' + vals.TX + '">' + humanFileSize(vals.TX, 1024) + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right">' + humanFileSize(vals.RX + vals.TX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-total="' + (vals.RX + vals.TX) + '">' + humanFileSize(vals.RX + vals.TX, 1024) + '</td>');
 				tr.append(td);
 			});
 
@@ -186,6 +207,9 @@ $(function () {
 	}
 
 	function loadDaily(nwif, month) {
+		var MyDate = new Date();
+		var cur_date = MyDate.getFullYear() + '-' + ('0' + (MyDate.getMonth()+1)).slice(-2) + '-' + ('0' + MyDate.getDate()).slice(-2);
+
 		$.getJSON('/stats/' + nwif + '/' + month, function (data) {
 			$('#DayStats' + nwif).empty();
 			$('#DayStats' + nwif).data('month', month);
@@ -193,15 +217,18 @@ $(function () {
 			var thds = $('<tr><th>Day</th><th class="text-right">Downloaded</th><th class="text-right">Uploaded</th><th class="text-right">Total</th></tr>')
 			table.append(thds);
 			$.each(data, function (idx, vals) {
-					var tr = $('<tr>');
+				var tr = $('<tr>');
+				if (vals.Date == cur_date) {
+					tr.addClass('live-stat');
+				}
 				table.append(tr);
 				var td = $('<td>' + vals.Date + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right">' + humanFileSize(vals.RX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-rx="' + vals.RX + '">' + humanFileSize(vals.RX, 1024) + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right">' + humanFileSize(vals.TX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-tx="' + vals.TX + '">' + humanFileSize(vals.TX, 1024) + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right">' + humanFileSize(vals.RX + vals.TX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-total="' + (vals.RX + vals.TX) + '">' + humanFileSize(vals.RX + vals.TX, 1024) + '</td>');
 				tr.append(td);
 			});
 
@@ -230,5 +257,4 @@ $(function () {
 		e.after(view_more);
 	}
 
-	var start = new Date;
 });
