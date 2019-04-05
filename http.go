@@ -36,7 +36,7 @@ func streamController(w http.ResponseWriter, r *http.Request, config Config) {
 		}
 		return
 	}
-	log.Print("Websocket connected")
+	// log.Print("Websocket connected")
 	wsReader(conn, config)
 }
 
@@ -60,13 +60,12 @@ func wsReader(ws *websocket.Conn, config Config) {
 	ticker := time.NewTicker(1000 * time.Millisecond)
 
 	defer func() {
-		log.Print("Websocket disconnected")
+		// log.Print("Websocket disconnected")
 		ticker.Stop()
 		ws.Close()
 	}()
 
 	for range ticker.C {
-		// response := make([][]JsonReturn, len(config.Interfaces))
 		output := make([]JsonReturn, len(config.Interfaces))
 		for i := 0; i < len(config.Interfaces); i++ {
 			if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
@@ -89,7 +88,7 @@ func wsReader(ws *websocket.Conn, config Config) {
 	}
 }
 
-// Handles /stats/<nwif>/(<date>)?
+// Handles /stats/<nwif>(/<date>)?
 func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 	re, _ := regexp.Compile(`/stats/([a-z0-9\-]+)/?(\d\d\d\d\-\d\d)?`)
 	matches := re.FindStringSubmatch(r.URL.String())
@@ -116,8 +115,7 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 	var stats []Statistic
 	var stmt *sqlite3.Stmt
 
-	fmt.Println(matches)
-
+	// fmt.Println(matches)
 
 	if stats_month != "" {
 		// daily stats

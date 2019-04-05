@@ -40,7 +40,8 @@ func bwLogger(config Config) {
 	// loop the functionality
 	ticker := time.NewTicker(time.Duration(config.Save*1000) * time.Millisecond)
 
-	for range ticker.C {
+	// for range ticker.C {
+	for ; true; <-ticker.C {
 		conn, _ := sqlite3.Open(config.Database)
 
 		currentTime := time.Now()
@@ -52,25 +53,23 @@ func bwLogger(config Config) {
 				in := (rx - stats[i][0]) / 1024
 				out := (tx - stats[i][1]) / 1024
 
-				if in > 0 || out > 0 {
-					// fmt.Println("+ Logging", config.Interfaces[i], in, out)
-					// Daily totals
-					err = conn.Exec(`INSERT OR IGNORE INTO Daily
-						VALUES(?, ?, 0, 0)	ON CONFLICT(Day, Interface)
-						DO UPDATE SET RX=RX+?, TX=TX+?`,
-						sqlDay, config.Interfaces[i], in, out)
-					if err != nil {
-						fmt.Println(err)
-						continue
-					}
-					// Monthly totals
-					err = conn.Exec(`INSERT OR IGNORE INTO Monthly VALUES(?, ?, 0, 0)
-						ON CONFLICT(Month, Interface) DO UPDATE SET RX=RX+?, TX=TX+?`,
-						sqlMonth, config.Interfaces[i], in, out)
-					if err != nil {
-						fmt.Println(err)
-						continue
-					}
+				// fmt.Println("+ Logging", config.Interfaces[i], in, out)
+				// Daily totals
+				err = conn.Exec(`INSERT OR IGNORE INTO Daily
+					VALUES(?, ?, 0, 0)	ON CONFLICT(Day, Interface)
+					DO UPDATE SET RX=RX+?, TX=TX+?`,
+					sqlDay, config.Interfaces[i], in, out)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+				// Monthly totals
+				err = conn.Exec(`INSERT OR IGNORE INTO Monthly VALUES(?, ?, 0, 0)
+					ON CONFLICT(Month, Interface) DO UPDATE SET RX=RX+?, TX=TX+?`,
+					sqlMonth, config.Interfaces[i], in, out)
+				if err != nil {
+					fmt.Println(err)
+					continue
 				}
 
 				// set new totals

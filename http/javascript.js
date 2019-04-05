@@ -22,7 +22,7 @@ $(function () {
 
 		tabcontent.append(canv);
 
-		var day_stats = $('<div class="col-md-6"><h4>Daily totals</h4><div id="DayStats' + ifname + '"></div></div>');
+		var day_stats = $('<div class="col-md-6"><h4 id="StatsTop">Daily totals</h4><div id="DayStats' + ifname + '"></div></div>');
 		var month_stats = $('<div class="col-md-6"><h4>Monthly totals</h4><div id="MonthStats' + ifname + '"></div></div>');
 
 		var stats_row = $('<div class="row">');
@@ -30,7 +30,7 @@ $(function () {
 		stats_row.append(month_stats);
 		tabcontent.append(stats_row);
 
-		refreshMonthly(ifname);
+		loadMonthlyStats(ifname);
 
 
 		// open first tab
@@ -69,18 +69,18 @@ $(function () {
 
 	function humanFileSize(bytes, si) {
 		var thresh = si ? 1000 : 1024;
-		if(Math.abs(bytes) < thresh) {
-			return bytes + ' kB/s';
+		if (Math.abs(bytes) < thresh) {
+			return bytes + ' kB';
 		}
 		var units = si
-			? ['MB','GB','TB']
-			: ['MiB','GiB','TiB'];
+			? ['MB', 'GB', 'TB']
+			: ['MiB', 'GiB', 'TiB'];
 		var u = -1;
 		do {
 			bytes /= thresh;
 			++u;
-		} while(Math.abs(bytes) >= thresh && u < units.length - 1);
-		return bytes.toFixed(1)+' '+units[u];
+		} while (Math.abs(bytes) >= thresh && u < units.length - 1);
+		return bytes.toFixed(1) + ' ' + units[u];
 	}
 
 	function connect() {
@@ -106,8 +106,7 @@ $(function () {
 		ws.onclose = function (e) {
 			$('#Led').removeClass('connected');
 			setTimeout(function () {
-				// reconnect
-				connect();
+				connect(); // reconnect
 			}, 3000);
 		};
 
@@ -118,15 +117,83 @@ $(function () {
 
 	connect();
 
-	function refreshMonthly(nwif) {
-		$.getJSON('/stats/' + nwif, function( data ) {
-			$('#MonthStats' + nwif).empty();
-			var table = $('<table>', {class: 'table'});
-			var ths = $('<tr><th>Month</th><th class="text-right">Downloaded</th><th class="text-right">Uploaded</th></tr>')
-			table.append(ths);
-			$.each( data, function(idx, vals) {
-				console.log(vals);
-				var tr = $('<tr>');
+	function loadMonthlyStats(nwif, highlight = false) {
+		$.getJSON('/stats/' + nwif, function (data) {
+			var fresh_start = $('#MonthStats' + nwif).is(':empty');
+			if (!fresh_start) {
+				$('#MonthStats' + nwif).empty();
+			}
+			var table = $('<table>', { class: 'table dtable-bordered table-dark table-hover table-hover table-sm' });
+			var thds = $('<tr><th>Month</th><th class="text-right">Downloaded</th><th class="text-right">Uploaded</th><th class="text-right">Total</th></tr>')
+			table.append(thds);
+			var tbody = $('<tbody>');
+			table.append(tbody);
+
+			$.each(data, function (idx, vals) {
+				var tr = $('<tr>', {class: 'clickable ' + vals.Date});
+				tr.data('month', vals.Date);
+				tr.on('clickload', function() {
+					$(this).parent().find('tr').removeClass('table-active');
+					$(this).addClass('table-active');
+					loadDaily(nwif, $(this).data('month'));
+				});
+				tr.on('click', function() {
+					$('html, body').animate({
+						scrollTop: $("#StatsTop").offset().top
+					}, 500);
+					$(this).trigger('clickload');
+					// $(this).parent().find('tr').removeClass('table-active');
+					// $(this).addClass('table-active');
+					// loadDaily(nwif, $(this).data('month'));
+				});
+				tbody.append(tr);
+				var td = $('<td>' + vals.Date + '</td>');
+				tr.append(td);
+				var td = $('<td class="text-right">' + humanFileSize(vals.RX, 1024) + '</td>');
+				tr.append(td);
+				var td = $('<td class="text-right">' + humanFileSize(vals.TX, 1024) + '</td>');
+				tr.append(td);
+				var td = $('<td class="text-right">' + humanFileSize(vals.RX + vals.TX, 1024) + '</td>');
+				tr.append(td);
+			});
+
+			$('#MonthStats' + nwif).append(table);
+
+			if (fresh_start) {
+				hideMore('#MonthStats' + nwif, 500, 'view all months');
+			}
+
+			var clicked_row = false;
+
+			if (highlight) {
+				clicked_row = tbody.find('tr.' + highlight).first();
+			}
+
+			if (!clicked_row) {
+				clicked_row = tbody.find('tr').first();
+			}
+
+			clicked_row.trigger('clickload');
+
+			if (fresh_start) {
+				// auto-refresh
+				setInterval(function() {
+					var cur_selected_month = $('#MonthStats' + nwif).find('tr.table-active').first().data('month');
+					loadMonthlyStats(nwif, cur_selected_month);
+				}, 60000);
+			}
+		});
+	}
+
+	function loadDaily(nwif, month) {
+		$.getJSON('/stats/' + nwif + '/' + month, function (data) {
+			$('#DayStats' + nwif).empty();
+			$('#DayStats' + nwif).data('month', month);
+			var table = $('<table>', { class: 'table table-bordered table-dark table-sm' });
+			var thds = $('<tr><th>Day</th><th class="text-right">Downloaded</th><th class="text-right">Uploaded</th><th class="text-right">Total</th></tr>')
+			table.append(thds);
+			$.each(data, function (idx, vals) {
+					var tr = $('<tr>');
 				table.append(tr);
 				var td = $('<td>' + vals.Date + '</td>');
 				tr.append(td);
@@ -134,9 +201,34 @@ $(function () {
 				tr.append(td);
 				var td = $('<td class="text-right">' + humanFileSize(vals.TX, 1024) + '</td>');
 				tr.append(td);
+				var td = $('<td class="text-right">' + humanFileSize(vals.RX + vals.TX, 1024) + '</td>');
+				tr.append(td);
 			});
 
-			$('#MonthStats' + nwif).append(table);
+			$('#DayStats' + nwif).append(table);
 		});
 	}
+
+
+	function hideMore(el, max_height, message = "View all") {
+		var e = $(el);
+		if (!e.length || e.height() < max_height) {
+			return;
+		}
+		e.addClass('truncated');
+		e.height(max_height);
+		var view_more = $('<div class="view-more"></div>');
+		var l = $('<a href="#">' + message + ' &DownArrowBar;</a>');
+		l.on('click', function (ev) {
+			var tr = $(this).parent().parent().find('.truncated');
+			tr.height('auto');
+			tr.removeClass('truncated');
+			$(this).parent().remove();
+			return false;
+		});
+		view_more.append(l);
+		e.after(view_more);
+	}
+
+	var start = new Date;
 });
