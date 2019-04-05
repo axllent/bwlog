@@ -19,6 +19,7 @@ Usage of bwlog:
         port to listen on (default "0.0.0.0:8080")
   -s int
         save to database every X seconds (default 60)
+  -v    show version number
 ```
 
 
