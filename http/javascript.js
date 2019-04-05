@@ -32,7 +32,6 @@ $(function () {
 
 		loadMonthlyStats(ifname);
 
-
 		// open first tab
 		$('#nwtabs a').first().tab('show');
 
@@ -162,9 +161,13 @@ $(function () {
 					loadDaily(nwif, $(this).data('month'));
 				});
 				tr.on('click', function() {
-					$('html, body').animate({
-						scrollTop: $("#StatsTop").offset().top
-					}, 500);
+					var page_pos = $(window).scrollTop();
+					var stats_pos = $("#StatsTop").offset().top - 20;
+					if (page_pos > stats_pos) {
+						$('html, body').animate({
+							scrollTop: stats_pos
+						}, 500);
+					}
 					$(this).trigger('clickload');
 				});
 				tbody.append(tr);
