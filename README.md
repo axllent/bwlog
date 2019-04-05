@@ -17,3 +17,8 @@ Usage of bwlog:
 ## Example
 
 `bwlog -i eth0,docker0 -d ~/bwlog.sqlite`
+
+
+## Compiling
+
+`make`
