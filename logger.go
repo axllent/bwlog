@@ -17,6 +17,8 @@ func bwLogger(config Config) {
 		log.Fatal(err)
 	}
 
+	log.Println(fmt.Sprintf("Logging interfaces %s to %s", config.Interfaces, config.Database))
+
 	// create the tables if necessary (silently fails if they exist)
 	conn.Exec(`CREATE TABLE [Daily] ([Day] DATE, [Interface] VARCHAR (10), [RX] INTEGER, [TX] INTEGER)`)
 	conn.Exec(`CREATE TABLE [Daily] ([Day] DATE, [Interface] VARCHAR (10), [RX] INTEGER, [TX] INTEGER)`)

@@ -1,5 +1,3 @@
-//go:generate statik -src=./http
-
 package main
 
 import (
@@ -53,7 +51,7 @@ func main() {
 			streamController(w, r, config)
 		})
 
-		fmt.Println(fmt.Sprintf("HTTP running on %s", config.Listen))
+		log.Println(fmt.Sprintf("HTTP listening on %s", config.Listen))
 
 		log.Fatal(http.ListenAndServe(config.Listen, nil))
 	}()
