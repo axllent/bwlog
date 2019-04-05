@@ -51,10 +51,10 @@ $(function () {
 				return 0;
 			},
 			yMaxFormatter: function (max, precision) {
-				return humanFileSize(max, 1024) + '/s';
+				return humanFileSize(max) + '/s';
 			},
 			yIntermediateFormatter: function (intermediate, precision) {
-				return humanFileSize(intermediate, 1024) + '/s';
+				return humanFileSize(intermediate) + '/s';
 			}
 		});
 
@@ -97,8 +97,8 @@ $(function () {
 				charts[nw.If + '_tx'].append(new Date().getTime(), nw.Tx);
 
 				$('#CurStats' + nw.If).html(
-					'<span class="rx">' + humanFileSize(nw.Rx, 1024) + '</span> / ' +
-					'<span class="tx">' + humanFileSize(nw.Tx, 1024) + '</span>'
+					'<span class="rx">' + humanFileSize(nw.Rx) + '</span> / ' +
+					'<span class="tx">' + humanFileSize(nw.Tx) + '</span>'
 				);
 
 				$('#' + nw.If + ' tr.live-stat').each(function(){
@@ -107,14 +107,14 @@ $(function () {
 					var total = $(this).find('td[data-total]').first();
 
 					var new_rx = rx.data('rx') + nw.Rx;
-					rx.html(humanFileSize(new_rx, 1024));
+					rx.html(humanFileSize(new_rx));
 					rx.data('rx', new_rx);
 
 					var new_tx = tx.data('tx') + nw.Tx;
-					tx.html(humanFileSize(new_tx, 1024));
+					tx.html(humanFileSize(new_tx));
 					tx.data('tx', new_tx);
 
-					var new_total = humanFileSize(new_rx + new_tx, 1024);
+					var new_total = humanFileSize(new_rx + new_tx);
 					total.html(new_total)
 
 				});
@@ -170,11 +170,11 @@ $(function () {
 				tbody.append(tr);
 				var td = $('<td>' + vals.Date + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right" data-rx="' + vals.RX + '">' + humanFileSize(vals.RX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-rx="' + vals.RX + '">' + humanFileSize(vals.RX) + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right" data-tx="' + vals.TX + '">' + humanFileSize(vals.TX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-tx="' + vals.TX + '">' + humanFileSize(vals.TX) + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right" data-total="' + (vals.RX + vals.TX) + '">' + humanFileSize(vals.RX + vals.TX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-total="' + (vals.RX + vals.TX) + '">' + humanFileSize(vals.RX + vals.TX) + '</td>');
 				tr.append(td);
 			});
 
@@ -224,11 +224,11 @@ $(function () {
 				table.append(tr);
 				var td = $('<td>' + vals.Date + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right" data-rx="' + vals.RX + '">' + humanFileSize(vals.RX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-rx="' + vals.RX + '">' + humanFileSize(vals.RX) + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right" data-tx="' + vals.TX + '">' + humanFileSize(vals.TX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-tx="' + vals.TX + '">' + humanFileSize(vals.TX) + '</td>');
 				tr.append(td);
-				var td = $('<td class="text-right" data-total="' + (vals.RX + vals.TX) + '">' + humanFileSize(vals.RX + vals.TX, 1024) + '</td>');
+				var td = $('<td class="text-right" data-total="' + (vals.RX + vals.TX) + '">' + humanFileSize(vals.RX + vals.TX) + '</td>');
 				tr.append(td);
 			});
 
