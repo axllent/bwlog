@@ -126,6 +126,8 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 		stmt, _ = conn.Prepare(`SELECT Month, RX, TX FROM Monthly WHERE Interface = ? ORDER BY Month DESC`, nwif)
 	}
 
+	defer stmt.Close()
+
 	for {
 		hasRow, _ := stmt.Step()
 		if !hasRow {
