@@ -50,5 +50,14 @@ make
 
 ### Cross compiling
 
-I haven't had much luck cross compiling as `mattn/go-sqlite3` is a CGO enabled package, so requires a valid `gcc`
+I haven't had much luck cross-compiling as `mattn/go-sqlite3` is a CGO enabled package, so requires a valid `gcc`
 compiler for that required platform/architecture installed. I'm sure there are ways of doing it, but I gave up.
+
+
+## TODOs
+
+There are some other things I'd like to do at some stage if I ever get inspired:
+
+- Switch to vue.js
+- HTTP compression (gzip), possibly minify css/js
+- Optional basic auth
