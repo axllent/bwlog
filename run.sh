@@ -1,10 +1,10 @@
 export GOPATH=${PWD}
-if [ ! -d "src/" ]; then
-	go get \
-	github.com/rakyll/statik \
-	github.com/bvinc/go-sqlite-lite/sqlite3 \
-	github.com/gorilla/websocket
-fi
+
+CGO_ENABLED=1 go get \
+github.com/rakyll/statik \
+github.com/bvinc/go-sqlite-lite/sqlite3 \
+github.com/gorilla/websocket
+
 # Regenerate static files
 bin/statik -src=http/ -f
-go run *.go $@
+CGO_ENABLED=1 go run *.go $@
