@@ -3,7 +3,6 @@
 /dist/
 /pkg/
 /src/
-/statik/
 bwlog
 *.db
 *.json
