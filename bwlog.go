@@ -6,10 +6,12 @@ import (
 	_ "./statik"
 	"flag"
 	"fmt"
+	"github.com/axllent/gitrel"
 	"github.com/rakyll/statik/fs"
 	"log"
 	"net/http"
 	"strings"
+	"os"
 )
 
 type Config struct {
@@ -26,6 +28,7 @@ func main() {
 	listen := flag.String("l", "0.0.0.0:8080", "port to listen on")
 	database := flag.String("d", "./bwlog.sqlite", "database path")
 	save := flag.Int("s", 60, "save to database every X seconds")
+	update := flag.Bool("u", false, "updater to latest release")
 	showversion := flag.Bool("v", false, "show version number")
 
 	flag.Parse()
@@ -38,6 +41,19 @@ func main() {
 
 	if *showversion {
 		fmt.Println(fmt.Sprintf("Version: %s", version))
+		latest, _, _, err := gitrel.Latest("axllent/bwlog", "bwlog");
+		if err == nil && latest != version {
+			fmt.Println(fmt.Sprintf("Update available: %s\nRun `%s -u` to update.", latest, os.Args[0]))
+		}
+		return
+	}
+
+	if *update {
+		rel, err := gitrel.Update("axllent/bwlog", "bwlog", version)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(fmt.Sprintf("Updated %s to version %s", os.Args[0], rel))
 		return
 	}
 
