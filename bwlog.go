@@ -1,4 +1,4 @@
-//go:generate statik -src=./web
+//go:generate bin/statik -f -src=./web
 
 package main
 
