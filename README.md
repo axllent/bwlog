@@ -9,27 +9,28 @@ statistics history for each monitored interface.
 
 ## Usage options
 
-```
+```shell
 Usage of bwlog:
   -d string
-        database path (default "./bwlog.sqlite")
+    	database path (default "./bwlog.sqlite")
   -i string
-        interfaces to monitor, comma separated (default "eth0")
+    	interfaces to monitor, comma separated (default "eth0")
   -l string
-        port to listen on (default "0.0.0.0:8080")
+    	port to listen on (default "0.0.0.0:8080")
   -s int
-        save to database every X seconds (default 60)
-  -v    show version number
+    	save to database every X seconds (default 60)
+  -u	updater to latest release
+  -v	show version number
 ```
 
 
 ## Running BWLog
 
 ```shell
-./bwlog -i eth0,docker0 -d ~/bwlog.sqlite
+bwlog -i eth0,docker0 -d ~/bwlog.sqlite
 ```
 
-See `./bwlog -h` for options.
+See `bwlog -h` for options.
 
 If you wish to just run the code without building a binary, the wrapper `run.sh` can make this easy.
 Note that you need `golang` & `gcc` installed for this.
