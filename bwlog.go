@@ -24,12 +24,19 @@ type Config struct {
 var version = "dev"
 
 func main() {
-	interfaces := flag.String("i", "eth0", "interfaces to monitor, comma separated")
+	interfaces := flag.String("i", "", "interfaces to monitor, comma separated eg: eth0,eth1")
 	listen := flag.String("l", "0.0.0.0:8080", "port to listen on")
 	database := flag.String("d", "./bwlog.sqlite", "database path")
 	save := flag.Int("s", 60, "save to database every X seconds")
-	update := flag.Bool("u", false, "updater to latest release")
+	update := flag.Bool("u", false, "update to latest release")
 	showversion := flag.Bool("v", false, "show version number")
+
+	flag.Usage = func() {
+		fmt.Println(fmt.Sprintf("BWLog %s: A lightweight bandwidth logger.\n", version))
+		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog.sqlite\n", os.Args[0]))
+		fmt.Println("Options:")
+		flag.PrintDefaults()
+	}
 
 	flag.Parse()
 
@@ -55,6 +62,14 @@ func main() {
 		}
 		fmt.Println(fmt.Sprintf("Updated %s to version %s", os.Args[0], rel))
 		return
+	}
+
+	if *interfaces == "" {
+		fmt.Println("No network interfaces specified.\n")
+		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog.sqlite\n", os.Args[0]))
+		fmt.Println("Options:")
+		flag.PrintDefaults()
+		os.Exit(1)
 	}
 
 	go func() {
