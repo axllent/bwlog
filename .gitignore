@@ -8,3 +8,5 @@ bwlog
 *.db
 *.json
 *.sqlite
+
+/statik/statik.go
