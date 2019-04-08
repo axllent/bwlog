@@ -10,16 +10,16 @@ statistics history for each monitored interface.
 ## Usage options
 
 ```shell
-Usage of bwlog:
+Options:
   -d string
     	database path (default "./bwlog.sqlite")
   -i string
-    	interfaces to monitor, comma separated (default "eth0")
+    	interfaces to monitor, comma separated (eg: "eth0")
   -l string
     	port to listen on (default "0.0.0.0:8080")
   -s int
     	save to database every X seconds (default 60)
-  -u	updater to latest release
+  -u	update to latest release
   -v	show version number
 ```
 
