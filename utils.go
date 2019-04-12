@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Return array of rx, tx from network interface
+// Return int64 array of rx & tx values from network interface
 func readStats(nwIf string) (int64, int64, error) {
 	rx := fmt.Sprintf("/sys/class/net/%s/statistics/rx_bytes", nwIf)
 	tx := fmt.Sprintf("/sys/class/net/%s/statistics/tx_bytes", nwIf)
@@ -16,7 +16,9 @@ func readStats(nwIf string) (int64, int64, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-	istr := strings.Trim(string(idata), "\n") // trim string
+	// trim string
+	istr := strings.Trim(string(idata), "\n")
+	// convert string to int64
 	received, err := strconv.ParseInt(istr, 10, 64)
 	if err != nil {
 		return 0, 0, err
@@ -26,13 +28,23 @@ func readStats(nwIf string) (int64, int64, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-	tstr := strings.Trim(string(tdata), "\n") // trim string
+	// trim string
+	tstr := strings.Trim(string(tdata), "\n")
+	// convert string to int64
 	sent, err := strconv.ParseInt(tstr, 10, 64)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	// fmt.Println(received, sent)
-
 	return received, sent, nil
+}
+
+// Print info message
+func PrintInfo(str string) {
+	fmt.Println(str)
+}
+
+// Print error in red
+func PrintErr(str string) {
+	fmt.Println(fmt.Sprintf("\033[1;31m%s\033[0m", str))
 }
