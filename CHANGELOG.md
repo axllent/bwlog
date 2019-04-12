@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0]
+
+- Switch to CSV database format for portability
+- Remove Sqlite
+- `-d` now implies database directory
+
+
 ## [0.0.3]
 
 - Update help, no default network interface
