@@ -1,13 +1,17 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/bvinc/go-sqlite-lite/sqlite3"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"regexp"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -40,8 +44,8 @@ func streamController(w http.ResponseWriter, r *http.Request, config Config) {
 	wsReader(conn, config)
 }
 
+// Websocket reader
 func wsReader(ws *websocket.Conn, config Config) {
-	// defer ws.Close()
 	ws.SetReadLimit(512)
 
 	// create stats
@@ -108,44 +112,19 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 
 	stats_month := string(matches[2])
 
-	conn, _ := sqlite3.Open(config.Database)
-
-	defer conn.Close()
-
-	var stats []Statistic
-	var stmt *sqlite3.Stmt
-
-	// fmt.Println(matches)
+	var filename = string("")
 
 	if stats_month != "" {
-		// daily stats
-		month := string(matches[2]) + "%"
-		stmt, _ = conn.Prepare(`SELECT Day, RX, TX FROM Daily WHERE Interface = ? AND Day LIKE ? ORDER BY Day DESC`, nwif, month)
+		// daily statictics
+		filename = fmt.Sprintf("%s_daily.csv", nwif)
 	} else {
-		// monthlt stats
-		stmt, _ = conn.Prepare(`SELECT Month, RX, TX FROM Monthly WHERE Interface = ? ORDER BY Month DESC`, nwif)
+		// monthly statictics
+		filename = fmt.Sprintf("%s_monthly.csv", nwif)
 	}
 
-	defer stmt.Close()
+	datafile := filepath.Join(config.Database, filename)
 
-	for {
-		hasRow, _ := stmt.Step()
-		if !hasRow {
-			// The query is finished
-			break
-		}
-
-		var month string
-		var rx int64
-		var tx int64
-		stmt.Scan(&month, &rx, &tx)
-
-		stats = append(stats, Statistic{
-			Date: month,
-			RX:   rx,
-			TX:   tx,
-		})
-	}
+	stats, _ := ReturnRetults(datafile, stats_month)
 
 	results, err := json.Marshal(stats)
 	if err != nil {
@@ -157,7 +136,40 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 	fmt.Fprintf(w, "%s", string(results))
 }
 
-// php-like in_array() function
+// Open a data file, and return a slice of results in reverse order
+func ReturnRetults(datafile string, date string) ([]Statistic, error) {
+	var stats []Statistic
+
+	f, err := os.Open(datafile)
+	if err != nil {
+		return stats, err
+	}
+
+	rows, err := csv.NewReader(f).ReadAll()
+	if err != nil {
+		return stats, err
+	}
+
+	f.Close()
+
+	// read bottom to top
+	for i := len(rows) - 1; i > 0; i-- {
+		if date == "" || strings.Contains(rows[i][0], date) {
+			rx, _ := strconv.ParseInt(rows[i][1], 10, 64)
+			tx, _ := strconv.ParseInt(rows[i][2], 10, 64)
+
+			stats = append(stats, Statistic{
+				Date: rows[i][0],
+				RX:   rx,
+				TX:   tx,
+			})
+		}
+	}
+
+	return stats, nil
+}
+
+// A php-like in_array() function
 func in_array(x string, a []string) bool {
 	for _, n := range a {
 		if x == n {
