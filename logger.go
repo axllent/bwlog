@@ -1,33 +1,21 @@
-/**
- * Logger
- */
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
-	"github.com/bvinc/go-sqlite-lite/sqlite3"
 	"log"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 )
 
 func bwLogger(config Config) {
 
-	conn, err := sqlite3.Open(config.Database)
-	if err != nil {
-		log.Fatal(err)
-	}
+	PrintInfo(fmt.Sprintf("BWLog: Logging %s to %s", strings.Join(config.Interfaces, ","), config.Database))
 
-	log.Println(fmt.Sprintf("Logging interfaces %s to %s", config.Interfaces, config.Database))
-
-	// create the tables if necessary (silently fails if they exist)
-	conn.Exec(`CREATE TABLE [Daily] ([Day] DATE, [Interface] VARCHAR (10), [RX] INTEGER, [TX] INTEGER)`)
-	conn.Exec(`CREATE TABLE [Daily] ([Day] DATE, [Interface] VARCHAR (10), [RX] INTEGER, [TX] INTEGER)`)
-	conn.Exec(`CREATE TABLE [Monthly] ([Month] DATE, [Interface] VARCHAR (10), [RX] INTEGER, [TX] INTEGER)`)
-	conn.Exec(`CREATE UNIQUE INDEX [idx_Daily] ON [Daily] ([Day], [Interface])`)
-	conn.Exec(`CREATE UNIQUE INDEX [idx_Monthly] ON [Monthly] ([Month], [Interface])`)
-	conn.Close()
-
-	// create stats
+	// create stats array
 	stats := make([][]int64, len(config.Interfaces))
 
 	for i := 0; i < len(config.Interfaces); i++ {
@@ -42,33 +30,35 @@ func bwLogger(config Config) {
 	// loop the functionality
 	ticker := time.NewTicker(time.Duration(config.Save*1000) * time.Millisecond)
 
-	// for range ticker.C {
 	for ; true; <-ticker.C {
-		conn, _ := sqlite3.Open(config.Database)
-
 		currentTime := time.Now()
-		sqlDay := currentTime.Format("2006-01-02")
-		sqlMonth := currentTime.Format("2006-01")
+		csvDay := currentTime.Format("2006-01-02")
+		csvMonth := currentTime.Format("2006-01")
+
+		// start := time.Now()
 
 		for i := 0; i < len(config.Interfaces); i++ {
 			if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
 				in := (rx - stats[i][0]) / 1024
 				out := (tx - stats[i][1]) / 1024
 
-				// fmt.Println("+ Logging", config.Interfaces[i], in, out)
-				// Daily totals
-				err = conn.Exec(`INSERT OR IGNORE INTO Daily
-					VALUES(?, ?, 0, 0)	ON CONFLICT(Day, Interface)
-					DO UPDATE SET RX=RX+?, TX=TX+?`,
-					sqlDay, config.Interfaces[i], in, out)
+				dailyname := fmt.Sprintf("%s_daily.csv", config.Interfaces[i])
+				dailydb := filepath.Join(config.Database, dailyname)
+
+				CreateDB(dailydb, "Day")
+
+				monthlyname := fmt.Sprintf("%s_monthly.csv", config.Interfaces[i])
+				monthlydb := filepath.Join(config.Database, monthlyname)
+
+				CreateDB(monthlydb, "Month")
+
+				err = LogToDB(dailydb, csvDay, in, out)
 				if err != nil {
 					fmt.Println(err)
 					continue
 				}
-				// Monthly totals
-				err = conn.Exec(`INSERT OR IGNORE INTO Monthly VALUES(?, ?, 0, 0)
-					ON CONFLICT(Month, Interface) DO UPDATE SET RX=RX+?, TX=TX+?`,
-					sqlMonth, config.Interfaces[i], in, out)
+
+				err = LogToDB(monthlydb, csvMonth, in, out)
 				if err != nil {
 					fmt.Println(err)
 					continue
@@ -80,6 +70,81 @@ func bwLogger(config Config) {
 			}
 		}
 
-		conn.Close()
+		// elapsed := time.Since(start)
+		// log.Printf("Binomial took %s", elapsed)
 	}
+}
+
+// Create a new CSV file and append headers
+func CreateDB(datafile string, datehdr string) {
+	_, err := os.Stat(datafile)
+	if err != nil {
+		// file does not exist, create
+		// fmt.Println(fmt.Sprintf("Creating new database file for %s", datafile))
+		f, err := os.OpenFile(datafile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		w := csv.NewWriter(f)
+		w.Write([]string{datehdr, "RX", "TX"})
+		w.Flush()
+	}
+}
+
+// Function will open, read and append to log file
+func LogToDB(path string, date string, rx int64, tx int64) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	rows, err := csv.NewReader(f).ReadAll()
+	if err != nil {
+		return err
+	}
+
+	f.Close()
+
+	match := false
+
+	// read bottom to top
+	for i := len(rows) - 1; i > 0; i-- {
+		if rows[i][0] == date {
+			match = true
+			newrx := AddInt64ToString(rows[i][1], rx)
+			rows[i][1] = newrx
+			newtx := AddInt64ToString(rows[i][2], tx)
+			rows[i][2] = newtx
+			continue
+		}
+	}
+
+	if !match {
+		rows = append(rows, []string{date, strconv.FormatInt(rx, 10), strconv.FormatInt(tx, 10)})
+	}
+
+	w, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	err = csv.NewWriter(w).WriteAll(rows)
+	w.Close()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Add an int64 to a string, and return as as string for csv
+func AddInt64ToString(str string, val int64) string {
+	i, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return strconv.FormatInt(val, 10)
+	}
+
+	i = i + val
+	return strconv.FormatInt(i, 10)
 }

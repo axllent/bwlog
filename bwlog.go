@@ -10,8 +10,8 @@ import (
 	"github.com/rakyll/statik/fs"
 	"log"
 	"net/http"
-	"strings"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -26,7 +26,7 @@ var version = "dev"
 func main() {
 	interfaces := flag.String("i", "", "interfaces to monitor, comma separated eg: eth0,eth1")
 	listen := flag.String("l", "0.0.0.0:8080", "port to listen on")
-	database := flag.String("d", "./bwlog.sqlite", "database path")
+	database := flag.String("d", "", "database directory path")
 	save := flag.Int("s", 60, "save to database every X seconds")
 	update := flag.Bool("u", false, "update to latest release")
 	showversion := flag.Bool("v", false, "show version number")
@@ -48,7 +48,7 @@ func main() {
 
 	if *showversion {
 		fmt.Println(fmt.Sprintf("Version: %s", version))
-		latest, _, _, err := gitrel.Latest("axllent/bwlog", "bwlog");
+		latest, _, _, err := gitrel.Latest("axllent/bwlog", "bwlog")
 		if err == nil && latest != version {
 			fmt.Println(fmt.Sprintf("Update available: %s\nRun `%s -u` to update.", latest, os.Args[0]))
 		}
@@ -65,13 +65,33 @@ func main() {
 	}
 
 	if *interfaces == "" {
-		fmt.Println("No network interfaces specified.\n")
-		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog.sqlite\n", os.Args[0]))
+		PrintErr("No network interfaces specified.\n")
+		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog/\n", os.Args[0]))
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
+	if *database == "" {
+		PrintErr("No database directory specified.\n")
+		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog/\n", os.Args[0]))
+		fmt.Println("Options:")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
+	dbinfo, err := os.Stat(config.Database)
+	if err != nil {
+		PrintErr(fmt.Sprintf("%s does not exist, exiting", config.Database))
+		os.Exit(1)
+	}
+
+	if !dbinfo.IsDir() {
+		PrintErr(fmt.Sprintf("%s is not a directory, exiting", config.Database))
+		os.Exit(1)
+	}
+
+	// Start new thread for httpd
 	go func() {
 		// load static file FS
 		statikFS, err := fs.New()
@@ -92,7 +112,7 @@ func main() {
 			streamController(w, r, config)
 		})
 
-		log.Println(fmt.Sprintf("HTTP listening on %s", config.Listen))
+		PrintInfo(fmt.Sprintf("HTTP listening on %s", config.Listen))
 
 		log.Fatal(http.ListenAndServe(config.Listen, nil))
 	}()
