@@ -1,6 +1,6 @@
 # Changelog
 
-## [dev]
+## [0.2.0]
 
 - Gzip static http response
 - Add basic auth
