@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1]
+
+- Auto-detect websocket protocol
+
+
 ## [0.2.0]
 
 - Gzip static http response
