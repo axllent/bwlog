@@ -39,12 +39,12 @@ func readStats(nwIf string) (int64, int64, error) {
 	return received, sent, nil
 }
 
-// Print info message
+// PrintInfo prints info message
 func PrintInfo(str string) {
 	fmt.Println(str)
 }
 
-// Print error in red
+// PrintErr prints error in red
 func PrintErr(str string) {
 	fmt.Println(fmt.Sprintf("\033[1;31m%s\033[0m", str))
 }

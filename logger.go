@@ -75,7 +75,7 @@ func bwLogger(config Config) {
 	}
 }
 
-// Create a new CSV file and append headers
+// CreateDB creates a new CSV file and append headers
 func CreateDB(datafile string, datehdr string) {
 	_, err := os.Stat(datafile)
 	if err != nil {
@@ -92,7 +92,7 @@ func CreateDB(datafile string, datehdr string) {
 	}
 }
 
-// Function will open, read and append to log file
+// LogToDB will open, read and append to log file
 func LogToDB(path string, date string, rx int64, tx int64) error {
 	f, err := os.Open(path)
 	if err != nil {
@@ -138,7 +138,7 @@ func LogToDB(path string, date string, rx int64, tx int64) error {
 	return nil
 }
 
-// Add an int64 to a string, and return as as string for csv
+// AddInt64ToString adds an int64 to a string, and return as as string for csv
 func AddInt64ToString(str string, val int64) string {
 	i, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {

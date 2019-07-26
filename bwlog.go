@@ -1,19 +1,19 @@
-//go:generate bin/statik -f -src=./web
-
 package main
 
 import (
-	_ "./statik"
 	"flag"
 	"fmt"
-	"github.com/axllent/gitrel"
-	"github.com/rakyll/statik/fs"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	_ "./statik"
+	"github.com/axllent/gitrel"
+	"github.com/rakyll/statik/fs"
 )
 
+// Config struct
 type Config struct {
 	Interfaces []string
 	Database   string

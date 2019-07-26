@@ -10,7 +10,7 @@ build = CGO_ENABLED=0 GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/bwlog_${
 bwlog: bwlog.go
 	CGO_ENABLED=0 go get github.com/axllent/gitrel github.com/rakyll/statik github.com/gorilla/websocket
 	rm -rf statik
-	bin/statik -src=web/ -f
+	${GOPATH}/bin/statik -src=web/ -f
 	CGO_ENABLED=1 go build ${LDFLAGS} -o bwlog
 
 clean:
@@ -20,7 +20,7 @@ release:
 	rm -f dist/bwlog_${VERSION}_*
 	go get github.com/axllent/gitrel github.com/rakyll/statik github.com/gorilla/websocket
 	rm -rf statik
-	bin/statik -src=web/ -f
+	${GOPATH}/bin/statik -src=web/ -f
 	$(call build,darwin,386)
 	$(call build,darwin,amd64)
 	$(call build,freebsd,386)

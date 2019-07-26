@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"os"
@@ -13,14 +12,18 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
-type JsonReturn struct {
+// JSONReturn struct
+type JSONReturn struct {
 	If string
 	Rx int64
 	Tx int64
 }
 
+// Statistic struct
 type Statistic struct {
 	Date string
 	RX   int64
@@ -40,11 +43,10 @@ func streamController(w http.ResponseWriter, r *http.Request, config Config) {
 		}
 		return
 	}
-	// log.Print("Websocket connected")
 	wsReader(conn, config)
 }
 
-// Websocket reader
+// wsReader sebsocket reader
 func wsReader(ws *websocket.Conn, config Config) {
 	ws.SetReadLimit(512)
 
@@ -70,17 +72,17 @@ func wsReader(ws *websocket.Conn, config Config) {
 	}()
 
 	for range ticker.C {
-		output := make([]JsonReturn, len(config.Interfaces))
+		output := make([]JSONReturn, len(config.Interfaces))
 		for i := 0; i < len(config.Interfaces); i++ {
 			if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
 				in := (rx - stats[i][0]) / 1024
 				out := (tx - stats[i][1]) / 1024
 				stats[i][0] = rx
 				stats[i][1] = tx
-				m := JsonReturn{config.Interfaces[i], in, out}
+				m := JSONReturn{config.Interfaces[i], in, out}
 				output[i] = m
 			} else {
-				m := JsonReturn{config.Interfaces[i], 0, 0}
+				m := JSONReturn{config.Interfaces[i], 0, 0}
 				output[i] = m
 			}
 		}
@@ -105,16 +107,16 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 
 	nwif := string(matches[1])
 
-	if !in_array(nwif, config.Interfaces) {
+	if !InArray(nwif, config.Interfaces) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - unknown interface!"))
 	}
 
-	stats_month := string(matches[2])
+	statsMonth := string(matches[2])
 
 	var filename = string("")
 
-	if stats_month != "" {
+	if statsMonth != "" {
 		// daily statictics
 		filename = fmt.Sprintf("%s_daily.csv", nwif)
 	} else {
@@ -124,7 +126,7 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 
 	datafile := filepath.Join(config.Database, filename)
 
-	stats, _ := ReturnRetults(datafile, stats_month)
+	stats, _ := ReturnRetults(datafile, statsMonth)
 
 	results, err := json.Marshal(stats)
 	if err != nil {
@@ -136,7 +138,7 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 	fmt.Fprintf(w, "%s", string(results))
 }
 
-// Open a data file, and return a slice of results in reverse order
+// ReturnRetults opens a data file, and returns a slice of results in reverse order
 func ReturnRetults(datafile string, date string) ([]Statistic, error) {
 	var stats []Statistic
 
@@ -169,8 +171,8 @@ func ReturnRetults(datafile string, date string) ([]Statistic, error) {
 	return stats, nil
 }
 
-// A php-like in_array() function
-func in_array(x string, a []string) bool {
+// InArray is a php-like InArray() function
+func InArray(x string, a []string) bool {
 	for _, n := range a {
 		if x == n {
 			return true
