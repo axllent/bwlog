@@ -33,7 +33,7 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Println(fmt.Sprintf("BWLog %s: A lightweight bandwidth logger.\n", version))
-		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog.sqlite\n", os.Args[0]))
+		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog/\n", os.Args[0]))
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 	}
