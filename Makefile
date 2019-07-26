@@ -4,23 +4,23 @@ export GOPATH
 VERSION ?= "dev"
 LDFLAGS=-ldflags "-s -extldflags \"--static\" -w -X main.version=${VERSION}"
 
-build = CGO_ENABLED=0 GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/bwlog_${VERSION}_$(1)_$(2) \
+build = GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/bwlog_${VERSION}_$(1)_$(2) \
 	&& bzip2 -f dist/bwlog_${VERSION}_$(1)_$(2)
 
-bwlog: bwlog.go
-	CGO_ENABLED=0 go get github.com/axllent/gitrel github.com/rakyll/statik github.com/gorilla/websocket
+main-build: *.go
+	go get github.com/axllent/gitrel github.com/rakyll/statik github.com/gorilla/websocket github.com/NYTimes/gziphandler
 	rm -rf statik
-	bin/statik -src=web/ -f
-	CGO_ENABLED=1 go build ${LDFLAGS} -o bwlog
+	${GOPATH}/bin/statik -src=web/ -f
+	go build ${LDFLAGS} -o bwlog
 
 clean:
 	rm -rf bin dist pkg src statik bwlog
 
 release:
 	rm -f dist/bwlog_${VERSION}_*
-	go get github.com/axllent/gitrel github.com/rakyll/statik github.com/gorilla/websocket
+	go get github.com/axllent/gitrel github.com/rakyll/statik github.com/gorilla/websocket github.com/NYTimes/gziphandler
 	rm -rf statik
-	bin/statik -src=web/ -f
+	${GOPATH}/bin/statik -src=web/ -f
 	$(call build,darwin,386)
 	$(call build,darwin,amd64)
 	$(call build,freebsd,386)

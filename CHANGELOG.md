@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0]
+
+- Gzip static http response
+- Add basic auth
+
+
 ## [0.1.0]
 
 - Switch to CSV database format for portability

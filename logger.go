@@ -11,7 +11,8 @@ import (
 	"time"
 )
 
-func bwLogger(config Config) {
+// BWLogger periodically saves the current stats to CSV
+func BWLogger(config Config) {
 
 	PrintInfo(fmt.Sprintf("BWLog: Logging %s to %s", strings.Join(config.Interfaces, ","), config.Database))
 
@@ -34,8 +35,6 @@ func bwLogger(config Config) {
 		currentTime := time.Now()
 		csvDay := currentTime.Format("2006-01-02")
 		csvMonth := currentTime.Format("2006-01")
-
-		// start := time.Now()
 
 		for i := 0; i < len(config.Interfaces); i++ {
 			if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
@@ -69,13 +68,10 @@ func bwLogger(config Config) {
 				stats[i][1] = tx
 			}
 		}
-
-		// elapsed := time.Since(start)
-		// log.Printf("Binomial took %s", elapsed)
 	}
 }
 
-// Create a new CSV file and append headers
+// CreateDB creates a new CSV file and append headers
 func CreateDB(datafile string, datehdr string) {
 	_, err := os.Stat(datafile)
 	if err != nil {
@@ -92,7 +88,7 @@ func CreateDB(datafile string, datehdr string) {
 	}
 }
 
-// Function will open, read and append to log file
+// LogToDB will open, read and append to log file
 func LogToDB(path string, date string, rx int64, tx int64) error {
 	f, err := os.Open(path)
 	if err != nil {
@@ -138,7 +134,7 @@ func LogToDB(path string, date string, rx int64, tx int64) error {
 	return nil
 }
 
-// Add an int64 to a string, and return as as string for csv
+// AddInt64ToString adds an int64 to a string, and return as as string for csv
 func AddInt64ToString(str string, val int64) string {
 	i, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {

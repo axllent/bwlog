@@ -143,7 +143,7 @@ $(function () {
 			if (!fresh_start) {
 				$('#MonthStats' + nwif).empty();
 			}
-			var table = $('<table>', { class: 'table dtable-bordered table-dark table-hover table-hover table-sm' });
+			var table = $('<table>', { class: 'table table-bordered table-dark table-hover table-hover table-sm' });
 			var thds = $('<tr><th>Month</th><th class="text-right">Downloaded</th><th class="text-right">Uploaded</th><th class="text-right">Total</th></tr>')
 			table.append(thds);
 			var tbody = $('<tbody>');
