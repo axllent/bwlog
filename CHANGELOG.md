@@ -1,5 +1,10 @@
 # Changelog
 
+## [dev]
+
+- Gzip static http response
+
+
 ## [0.1.0]
 
 - Switch to CSV database format for portability

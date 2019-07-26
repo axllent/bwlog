@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	_ "./statik"
+	"github.com/NYTimes/gziphandler"
 	"github.com/axllent/gitrel"
 	"github.com/rakyll/statik/fs"
 )
@@ -100,7 +101,9 @@ func main() {
 		}
 
 		// default http route (statik FS)
-		http.Handle("/", http.FileServer(statikFS))
+		assets := http.FileServer(statikFS)
+		assetsCompressed := gziphandler.GzipHandler(assets)
+		http.Handle("/", assetsCompressed)
 
 		// stats controller
 		http.HandleFunc("/stats/", func(w http.ResponseWriter, r *http.Request) {
