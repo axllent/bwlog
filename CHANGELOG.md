@@ -3,6 +3,7 @@
 ## [dev]
 
 - Gzip static http response
+- Add basic auth
 
 
 ## [0.1.0]

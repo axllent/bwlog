@@ -17,6 +17,8 @@ Options:
         interfaces to monitor, comma separated eg: eth0,eth1
   -l string
         port to listen on (default "0.0.0.0:8080")
+  -p string
+        basic auth password file (must contain a single <user>:<pass>)
   -s int
         save to database every X seconds (default 60)
   -u    update to latest release
@@ -27,13 +29,13 @@ Options:
 ## Running BWLog
 
 ```shell
-bwlog -i eth0,docker0 -d ~/bwlog/
+bwlog -i eth0,docker0 -d ~/bwlog/ -p ~/bwlog/auth
 ```
 
 See `bwlog -h` for options.
 
 If you wish to just run the code without building a binary, the wrapper `run.sh` can make this easy.
-Note that you need `golang` & `gcc` installed for this.
+Note that you need `golang` installed to compile from source.
 
 
 ```shell
@@ -42,6 +44,15 @@ Note that you need `golang` & `gcc` installed for this.
 
 Unless you have specified different listening options, you should be able to connect to `127.0.0.1:8080`
 with your web browser.
+
+
+## Basic auth
+
+If you want to use basic auth, simply create a file with two words in it, your username and password, eg:
+```
+MyUser MySecretPass
+```
+Then just add `-p <password_file>` to your startup flags. BWLog does not handle multiple users/passwords.
 
 
 ## Compiling
@@ -90,5 +101,4 @@ before restarting the service.
 There are some other things I'd like to do at some stage if I ever get inspired and have some time:
 
 - Switch to vue.js
-- Optional basic auth
 - HTTPS

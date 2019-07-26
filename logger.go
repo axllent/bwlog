@@ -11,7 +11,8 @@ import (
 	"time"
 )
 
-func bwLogger(config Config) {
+// BWLogger periodically saves the current stats to CSV
+func BWLogger(config Config) {
 
 	PrintInfo(fmt.Sprintf("BWLog: Logging %s to %s", strings.Join(config.Interfaces, ","), config.Database))
 
@@ -34,8 +35,6 @@ func bwLogger(config Config) {
 		currentTime := time.Now()
 		csvDay := currentTime.Format("2006-01-02")
 		csvMonth := currentTime.Format("2006-01")
-
-		// start := time.Now()
 
 		for i := 0; i < len(config.Interfaces); i++ {
 			if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
@@ -69,9 +68,6 @@ func bwLogger(config Config) {
 				stats[i][1] = tx
 			}
 		}
-
-		// elapsed := time.Since(start)
-		// log.Printf("Binomial took %s", elapsed)
 	}
 }
 
