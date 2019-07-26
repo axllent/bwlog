@@ -83,7 +83,9 @@ $(function () {
 	}
 
 	function connect() {
-		var ws = new WebSocket("ws://" + document.location.host + "/stream");
+
+		wsproto = location.protocol == 'https:' ? 'wss' : 'ws';
+		var ws = new WebSocket(wsproto + "://" + document.location.host + "/stream");
 
 		ws.onmessage = function (event) {
 			$('#Led').addClass('connected');
