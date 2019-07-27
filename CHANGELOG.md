@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.2]
+
+- HTTPS support
+
+
 ## [0.2.1]
 
 - Auto-detect websocket protocol
