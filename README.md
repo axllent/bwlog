@@ -110,4 +110,3 @@ before restarting the service.
 There are some other things I'd like to do at some stage if I ever get inspired and have some time:
 
 - Switch to vue.js
-- HTTPS
