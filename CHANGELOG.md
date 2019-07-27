@@ -1,5 +1,10 @@
 # Changelog
 
+## [dev]
+
+- Switch to packr
+
+
 ## [0.2.2]
 
 - HTTPS support

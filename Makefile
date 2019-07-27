@@ -1,6 +1,7 @@
-
-GOPATH := ${PWD}
-export GOPATH
+ifndef $(GOPATH)
+    GOPATH=$(shell go env GOPATH)
+    export GOPATH
+endif
 VERSION ?= "dev"
 LDFLAGS=-ldflags "-s -extldflags \"--static\" -w -X main.version=${VERSION}"
 
@@ -8,9 +9,8 @@ build = GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/bwlog_${VERSION}_$(1)_
 	&& bzip2 -f dist/bwlog_${VERSION}_$(1)_$(2)
 
 main-build: *.go
-	go get github.com/axllent/gitrel github.com/rakyll/statik github.com/gorilla/websocket github.com/NYTimes/gziphandler
-	rm -rf statik
-	${GOPATH}/bin/statik -src=web/ -f
+	go get github.com/axllent/gitrel github.com/gobuffalo/packr github.com/gobuffalo/packr/packr github.com/gorilla/websocket github.com/NYTimes/gziphandler
+	${GOPATH}/bin/packr
 	go build ${LDFLAGS} -o bwlog
 
 clean:
@@ -18,9 +18,8 @@ clean:
 
 release:
 	rm -f dist/bwlog_${VERSION}_*
-	go get github.com/axllent/gitrel github.com/rakyll/statik github.com/gorilla/websocket github.com/NYTimes/gziphandler
-	rm -rf statik
-	${GOPATH}/bin/statik -src=web/ -f
+	go get github.com/axllent/gitrel github.com/gobuffalo/packr github.com/gobuffalo/packr/packr github.com/gorilla/websocket github.com/NYTimes/gziphandler
+	${GOPATH}/bin/packr
 	$(call build,darwin,386)
 	$(call build,darwin,amd64)
 	$(call build,freebsd,386)
