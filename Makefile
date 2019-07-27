@@ -14,7 +14,7 @@ main-build: *.go
 	go build ${LDFLAGS} -o bwlog
 
 clean:
-	rm -rf bin dist pkg src statik bwlog
+	rm -rf bin dist pkg src statik bwlog *-packr.go
 
 release:
 	rm -f dist/bwlog_${VERSION}_*
