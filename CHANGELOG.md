@@ -1,6 +1,6 @@
 # Changelog
 
-## [dev]
+## [0.2.3]
 
 - Switch to packr
 
