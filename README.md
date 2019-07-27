@@ -38,14 +38,6 @@ bwlog -i eth0,docker0 -d ~/bwlog/ -p ~/bwlog/auth
 
 See `bwlog -h` for options.
 
-If you wish to just run the code without building a binary, the wrapper `run.sh` can make this easy.
-Note that you need `golang` installed to compile from source.
-
-
-```shell
-./run.sh -i eth0,docker0 -d ~/bwlog/
-```
-
 Unless you have specified different listening options, you should be able to connect to `127.0.0.1:8080`
 with your web browser.
 
@@ -110,4 +102,3 @@ before restarting the service.
 There are some other things I'd like to do at some stage if I ever get inspired and have some time:
 
 - Switch to vue.js
-- HTTPS

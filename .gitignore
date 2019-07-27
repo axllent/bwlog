@@ -3,7 +3,7 @@
 /dist/
 /pkg/
 /src/
-/statik/
+/*-packr.go
 bwlog
 *.db
 *.json

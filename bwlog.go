@@ -1,5 +1,3 @@
-//go:generate bin/statik -f -src=./web
-
 package main
 
 import (
@@ -11,10 +9,9 @@ import (
 	"os"
 	"strings"
 
-	_ "./statik"
 	"github.com/NYTimes/gziphandler"
 	"github.com/axllent/gitrel"
-	"github.com/rakyll/statik/fs"
+	"github.com/gobuffalo/packr"
 )
 
 // Config struct
@@ -119,11 +116,7 @@ func main() {
 
 	// Start new thread for httpd
 	go func() {
-		// load static file FS
-		statikFS, err := fs.New()
-		if err != nil {
-			log.Fatal(err)
-		}
+		box := packr.NewBox("./web")
 
 		// stats controller
 		http.HandleFunc("/stats/", BasicAuth(func(w http.ResponseWriter, r *http.Request) {
@@ -136,8 +129,9 @@ func main() {
 		}))
 
 		http.HandleFunc("/", BasicAuth(func(w http.ResponseWriter, r *http.Request) {
-			gziphandler.GzipHandler(http.FileServer(statikFS)).ServeHTTP(w, r)
+			gziphandler.GzipHandler(http.FileServer(box)).ServeHTTP(w, r)
 		}))
+		// http.Handle("/", http.FileServer(box))
 
 		if sslcert != "" && sslkey != "" {
 			PrintInfo(fmt.Sprintf("HTTPS listening on %s", config.Listen))
