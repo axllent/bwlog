@@ -21,6 +21,10 @@ Options:
         basic auth password file (must contain a single <user>:<pass>)
   -s int
         save to database every X seconds (default 60)
+  -sslcert string
+        Path to SSL certificate (must be used together with sslkey)
+  -sslkey string
+        Path to private SSL key (must be used together with sslcert)
   -u    update to latest release
   -v    show version number
 ```
@@ -53,6 +57,11 @@ If you want to use basic auth, simply create a file with two words in it, your u
 MyUser MySecretPass
 ```
 Then just add `-p <password_file>` to your startup flags. BWLog does not handle multiple users/passwords.
+
+
+## HTTPS
+
+To enable HTTPS you must use both the `-sslcert` and `-sslkey` options to specify the respective certificate files.
 
 
 ## Compiling

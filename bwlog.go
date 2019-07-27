@@ -33,12 +33,14 @@ var (
 func main() {
 	var config Config
 
-	var bauth, interfaces string
+	var bauth, interfaces, sslcert, sslkey string
 	var update, showversion bool
 	flag.StringVar(&bauth, "p", "", "basic auth password file (must contain a single <user>:<pass>)")
 	flag.StringVar(&interfaces, "i", "", "interfaces to monitor, comma separated eg: eth0,eth1")
 	flag.StringVar(&config.Listen, "l", "0.0.0.0:8080", "port to listen on")
 	flag.StringVar(&config.Database, "d", "", "database directory path")
+	flag.StringVar(&sslcert, "sslcert", "", "Path to SSL certificate (must be used together with sslkey)")
+	flag.StringVar(&sslkey, "sslkey", "", "Path to private SSL key (must be used together with sslcert)")
 	flag.IntVar(&config.Save, "s", 60, "save to database every X seconds")
 	flag.BoolVar(&update, "u", false, "update to latest release")
 	flag.BoolVar(&showversion, "v", false, "show version number")
@@ -137,9 +139,13 @@ func main() {
 			gziphandler.GzipHandler(http.FileServer(statikFS)).ServeHTTP(w, r)
 		}))
 
-		PrintInfo(fmt.Sprintf("HTTP listening on %s", config.Listen))
-
-		log.Fatal(http.ListenAndServe(config.Listen, nil))
+		if sslcert != "" && sslkey != "" {
+			PrintInfo(fmt.Sprintf("HTTPS listening on %s", config.Listen))
+			log.Fatal(http.ListenAndServeTLS(config.Listen, sslcert, sslkey, nil))
+		} else {
+			PrintInfo(fmt.Sprintf("HTTP listening on %s", config.Listen))
+			log.Fatal(http.ListenAndServe(config.Listen, nil))
+		}
 	}()
 
 	// Stats daemon
