@@ -128,10 +128,10 @@ func main() {
 			streamController(w, r, config)
 		}))
 
+		// everything else handled by static files
 		http.HandleFunc("/", BasicAuth(func(w http.ResponseWriter, r *http.Request) {
 			gziphandler.GzipHandler(http.FileServer(box)).ServeHTTP(w, r)
 		}))
-		// http.Handle("/", http.FileServer(box))
 
 		if sslcert != "" && sslkey != "" {
 			PrintInfo(fmt.Sprintf("HTTPS listening on %s", config.Listen))
