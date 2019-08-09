@@ -50,16 +50,16 @@ func streamController(w http.ResponseWriter, r *http.Request, config Config) {
 func wsReader(ws *websocket.Conn, config Config) {
 	ws.SetReadLimit(512)
 
-	// create stats
-	stats := make([][]int64, len(config.Interfaces))
+	// create statsSlice
+	statsSlice := make([][]int64, len(config.Interfaces))
 
 	for i := 0; i < len(config.Interfaces); i++ {
 
 		if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
-			// create stats for each interface
-			stats[i] = make([]int64, 2)
-			stats[i][0] = rx
-			stats[i][1] = tx
+			// create statsSlice for each interface
+			statsSlice[i] = make([]int64, 2)
+			statsSlice[i][0] = rx
+			statsSlice[i][1] = tx
 		}
 	}
 
@@ -75,10 +75,10 @@ func wsReader(ws *websocket.Conn, config Config) {
 		output := make([]JSONReturn, len(config.Interfaces))
 		for i := 0; i < len(config.Interfaces); i++ {
 			if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
-				in := (rx - stats[i][0]) / 1024
-				out := (tx - stats[i][1]) / 1024
-				stats[i][0] = rx
-				stats[i][1] = tx
+				in := (rx - statsSlice[i][0]) / 1024
+				out := (tx - statsSlice[i][1]) / 1024
+				statsSlice[i][0] = rx
+				statsSlice[i][1] = tx
 				m := JSONReturn{config.Interfaces[i], in, out}
 				output[i] = m
 			} else {
@@ -96,6 +96,8 @@ func wsReader(ws *websocket.Conn, config Config) {
 
 // Handles /stats/<nwif>(/<date>)?
 func statsController(w http.ResponseWriter, r *http.Request, config Config) {
+	// save current stats so they are current
+	config.SaveStats()
 	re, _ := regexp.Compile(`/stats/([a-z0-9\-]+)/?(\d\d\d\d\-\d\d)?`)
 	matches := re.FindStringSubmatch(r.URL.String())
 
@@ -126,9 +128,9 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 
 	datafile := filepath.Join(config.Database, filename)
 
-	stats, _ := ReturnRetults(datafile, statsMonth)
+	statsSlice, _ := ReturnRetults(datafile, statsMonth)
 
-	results, err := json.Marshal(stats)
+	results, err := json.Marshal(statsSlice)
 	if err != nil {
 		log.Fatal("Cannot encode to JSON ", err)
 	}
@@ -140,16 +142,16 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 
 // ReturnRetults opens a data file, and returns a slice of results in reverse order
 func ReturnRetults(datafile string, date string) ([]Statistic, error) {
-	var stats []Statistic
+	var statsSlice []Statistic
 
 	f, err := os.Open(datafile)
 	if err != nil {
-		return stats, err
+		return statsSlice, err
 	}
 
 	rows, err := csv.NewReader(f).ReadAll()
 	if err != nil {
-		return stats, err
+		return statsSlice, err
 	}
 
 	f.Close()
@@ -160,7 +162,7 @@ func ReturnRetults(datafile string, date string) ([]Statistic, error) {
 			rx, _ := strconv.ParseInt(rows[i][1], 10, 64)
 			tx, _ := strconv.ParseInt(rows[i][2], 10, 64)
 
-			stats = append(stats, Statistic{
+			statsSlice = append(statsSlice, Statistic{
 				Date: rows[i][0],
 				RX:   rx,
 				TX:   tx,
@@ -168,7 +170,7 @@ func ReturnRetults(datafile string, date string) ([]Statistic, error) {
 		}
 	}
 
-	return stats, nil
+	return statsSlice, nil
 }
 
 // InArray is a php-like InArray() function

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.4]
+
+- Save stats on SIGTERM
+- Save stats so they are current on refresh
+
+
 ## [0.2.3]
 
 - Switch to packr

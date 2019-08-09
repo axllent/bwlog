@@ -11,13 +11,17 @@ import (
 	"time"
 )
 
+var (
+	stats [][]int64
+)
+
 // BWLogger periodically saves the current stats to CSV
 func BWLogger(config Config) {
 
 	PrintInfo(fmt.Sprintf("BWLog: Logging %s to %s", strings.Join(config.Interfaces, ","), config.Database))
 
-	// create stats array
-	stats := make([][]int64, len(config.Interfaces))
+	// populate the stats array
+	stats = make([][]int64, len(config.Interfaces))
 
 	for i := 0; i < len(config.Interfaces); i++ {
 		if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
@@ -32,41 +36,46 @@ func BWLogger(config Config) {
 	ticker := time.NewTicker(time.Duration(config.Save*1000) * time.Millisecond)
 
 	for ; true; <-ticker.C {
-		currentTime := time.Now()
-		csvDay := currentTime.Format("2006-01-02")
-		csvMonth := currentTime.Format("2006-01")
+		config.SaveStats()
+	}
+}
 
-		for i := 0; i < len(config.Interfaces); i++ {
-			if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
-				in := (rx - stats[i][0]) / 1024
-				out := (tx - stats[i][1]) / 1024
+// SaveStats saves the stats to the CSVs
+func (config *Config) SaveStats() {
+	currentTime := time.Now()
+	csvDay := currentTime.Format("2006-01-02")
+	csvMonth := currentTime.Format("2006-01")
 
-				dailyname := fmt.Sprintf("%s_daily.csv", config.Interfaces[i])
-				dailydb := filepath.Join(config.Database, dailyname)
+	for i := 0; i < len(config.Interfaces); i++ {
+		if rx, tx, err := readStats(config.Interfaces[i]); err == nil {
+			in := (rx - stats[i][0]) / 1024
+			out := (tx - stats[i][1]) / 1024
 
-				CreateDB(dailydb, "Day")
+			dailyname := fmt.Sprintf("%s_daily.csv", config.Interfaces[i])
+			dailydb := filepath.Join(config.Database, dailyname)
 
-				monthlyname := fmt.Sprintf("%s_monthly.csv", config.Interfaces[i])
-				monthlydb := filepath.Join(config.Database, monthlyname)
+			CreateDB(dailydb, "Day")
 
-				CreateDB(monthlydb, "Month")
+			monthlyname := fmt.Sprintf("%s_monthly.csv", config.Interfaces[i])
+			monthlydb := filepath.Join(config.Database, monthlyname)
 
-				err = LogToDB(dailydb, csvDay, in, out)
-				if err != nil {
-					fmt.Println(err)
-					continue
-				}
+			CreateDB(monthlydb, "Month")
 
-				err = LogToDB(monthlydb, csvMonth, in, out)
-				if err != nil {
-					fmt.Println(err)
-					continue
-				}
-
-				// set new totals
-				stats[i][0] = rx
-				stats[i][1] = tx
+			err = LogToDB(dailydb, csvDay, in, out)
+			if err != nil {
+				fmt.Println(err)
+				continue
 			}
+
+			err = LogToDB(monthlydb, csvMonth, in, out)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+			// set new totals
+			stats[i][0] = rx
+			stats[i][1] = tx
 		}
 	}
 }
@@ -76,7 +85,6 @@ func CreateDB(datafile string, datehdr string) {
 	_, err := os.Stat(datafile)
 	if err != nil {
 		// file does not exist, create
-		// fmt.Println(fmt.Sprintf("Creating new database file for %s", datafile))
 		f, err := os.OpenFile(datafile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 		if err != nil {
 			log.Fatal(err)
