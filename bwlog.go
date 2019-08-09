@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/axllent/gitrel"
@@ -43,15 +45,15 @@ func main() {
 	flag.BoolVar(&showversion, "v", false, "show version number")
 
 	flag.Usage = func() {
-		fmt.Println(fmt.Sprintf("BWLog %s: A lightweight bandwidth logger.\n", version))
-		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog/\n", os.Args[0]))
+		fmt.Printf("BWLog %s: A lightweight bandwidth logger.\n\n", version)
+		fmt.Printf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog/\n\n", os.Args[0])
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 	}
 
 	flag.Usage = func() {
-		fmt.Println(fmt.Sprintf("BWLog %s: A lightweight bandwidth logger.\n", version))
-		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog.sqlite\n", os.Args[0]))
+		fmt.Printf("BWLog %s: A lightweight bandwidth logger.\n\n", version)
+		fmt.Printf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog.sqlite\n\n", os.Args[0])
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 	}
@@ -61,10 +63,10 @@ func main() {
 	config.Interfaces = strings.Split(interfaces, ",")
 
 	if showversion {
-		fmt.Println(fmt.Sprintf("Version: %s", version))
+		fmt.Printf("Version: %s\n", version)
 		latest, _, _, err := gitrel.Latest("axllent/bwlog", "bwlog")
 		if err == nil && latest != version {
-			fmt.Println(fmt.Sprintf("Update available: %s\nRun `%s -u` to update.", latest, os.Args[0]))
+			fmt.Printf("Update available: %s\nRun `%s -u` to update.\n", latest, os.Args[0])
 		}
 		return
 	}
@@ -74,13 +76,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(fmt.Sprintf("Updated %s to version %s", os.Args[0], rel))
+		fmt.Printf("Updated %s to version %s", os.Args[0], rel)
 		return
 	}
 
 	if interfaces == "" {
 		PrintErr("No network interfaces specified.\n")
-		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog/\n", os.Args[0]))
+		fmt.Printf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog/\n", os.Args[0])
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 		os.Exit(1)
@@ -88,7 +90,7 @@ func main() {
 
 	if config.Database == "" {
 		PrintErr("No database directory specified.\n")
-		fmt.Println(fmt.Sprintf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog/\n", os.Args[0]))
+		fmt.Printf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog/\n", os.Args[0])
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 		os.Exit(1)
@@ -97,7 +99,7 @@ func main() {
 	if bauth != "" {
 		err := ReadBasicAuth(bauth)
 		if err != nil {
-			PrintErr(fmt.Sprintf("Cannot read authentication file %s.\n", bauth))
+			fmt.Printf("Cannot read authentication file %s.\n", bauth)
 			os.Exit(1)
 		}
 
@@ -105,14 +107,28 @@ func main() {
 
 	dbinfo, err := os.Stat(config.Database)
 	if err != nil {
-		PrintErr(fmt.Sprintf("%s does not exist, exiting", config.Database))
+		fmt.Printf("%s does not exist, exiting\n", config.Database)
 		os.Exit(1)
 	}
 
 	if !dbinfo.IsDir() {
-		PrintErr(fmt.Sprintf("%s is not a directory, exiting", config.Database))
+		fmt.Printf("%s is not a directory, exiting\n", config.Database)
 		os.Exit(1)
 	}
+
+	sigs := make(chan os.Signal, 1)
+	// catch all signals since not explicitly listing
+	// Program that will listen to the SIGINT and SIGTERM
+	// SIGINT will listen to CTRL-C.
+	// SIGTERM will be caught if kill command executed
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	// method invoked upon seeing signal
+	go func() {
+		s := <-sigs
+		fmt.Printf("Got %s signal, saving data & shutting down...\n", s)
+		config.SaveStats()
+		os.Exit(1)
+	}()
 
 	// Start new thread for httpd
 	go func() {
