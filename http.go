@@ -116,7 +116,7 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 
 	statsMonth := string(matches[2])
 
-	var filename = string("")
+	filename := ""
 
 	if statsMonth != "" {
 		// daily statictics
