@@ -51,13 +51,6 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	flag.Usage = func() {
-		fmt.Printf("BWLog %s: A lightweight bandwidth logger.\n\n", version)
-		fmt.Printf("Usage example: %s -i eth0 -l 0.0.0.0:8080 -d ~/bwlog.sqlite\n\n", os.Args[0])
-		fmt.Println("Options:")
-		flag.PrintDefaults()
-	}
-
 	flag.Parse()
 
 	config.Interfaces = strings.Split(interfaces, ",")
