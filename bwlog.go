@@ -12,7 +12,7 @@ import (
 	"syscall"
 
 	"github.com/NYTimes/gziphandler"
-	"github.com/axllent/gitrel"
+	"github.com/axllent/ghru"
 	"github.com/gobuffalo/packr"
 )
 
@@ -57,20 +57,21 @@ func main() {
 
 	if showversion {
 		fmt.Printf("Version: %s\n", version)
-		latest, _, _, err := gitrel.Latest("axllent/bwlog", "bwlog")
-		if err == nil && latest != version {
+		latest, _, _, err := ghru.Latest("axllent/bwlog", "bwlog")
+		if err == nil && ghru.GreaterThan(latest, version) {
 			fmt.Printf("Update available: %s\nRun `%s -u` to update.\n", latest, os.Args[0])
 		}
-		return
+		os.Exit(0)
 	}
 
 	if update {
-		rel, err := gitrel.Update("axllent/bwlog", "bwlog", version)
+		rel, err := ghru.Update("axllent/bwlog", "bwlog", version)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
-		fmt.Printf("Updated %s to version %s", os.Args[0], rel)
-		return
+		fmt.Printf("Updated %s to version %s\n", os.Args[0], rel)
+		os.Exit(0)
 	}
 
 	if interfaces == "" {
