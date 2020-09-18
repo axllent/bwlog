@@ -9,7 +9,7 @@ build = GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/bwlog_${VERSION}_$(1)_
 	&& bzip2 -f dist/bwlog_${VERSION}_$(1)_$(2)
 
 main-build: *.go
-	go get github.com/axllent/gitrel github.com/gobuffalo/packr github.com/gobuffalo/packr/packr github.com/gorilla/websocket github.com/NYTimes/gziphandler
+	go get github.com/gobuffalo/packr/packr
 	${GOPATH}/bin/packr
 	go build ${LDFLAGS} -o bwlog
 
@@ -18,9 +18,8 @@ clean:
 
 release:
 	rm -f dist/bwlog_${VERSION}_*
-	go get github.com/axllent/gitrel github.com/gobuffalo/packr github.com/gobuffalo/packr/packr github.com/gorilla/websocket github.com/NYTimes/gziphandler
+	go get github.com/gobuffalo/packr/packr
 	${GOPATH}/bin/packr
-	$(call build,darwin,386)
 	$(call build,darwin,amd64)
 	$(call build,freebsd,386)
 	$(call build,freebsd,amd64)
