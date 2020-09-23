@@ -116,13 +116,13 @@ func statsController(w http.ResponseWriter, r *http.Request, config Config) {
 
 	statsMonth := string(matches[2])
 
-	var filename = string("")
+	filename := ""
 
 	if statsMonth != "" {
-		// daily statictics
+		// daily statistics
 		filename = fmt.Sprintf("%s_daily.csv", nwif)
 	} else {
-		// monthly statictics
+		// monthly statistics
 		filename = fmt.Sprintf("%s_monthly.csv", nwif)
 	}
 
