@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.5]
+
+- Switch to go mods
+- Remove duplicate help section
+- Switch to axllent/ghru for updating
+- Update modules & Makefile
+
+
 ## [0.2.4]
 
 - Save stats on SIGTERM
