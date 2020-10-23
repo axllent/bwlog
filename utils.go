@@ -29,7 +29,7 @@ func readStats(nwIf string) (int64, int64, error) {
 		return 0, 0, err
 	}
 	// trim string
-	tstr := strings.Trim(string(tdata), "\n")
+	tstr := strings.TrimSpace(string(tdata))
 	// convert string to int64
 	sent, err := strconv.ParseInt(tstr, 10, 64)
 	if err != nil {
