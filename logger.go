@@ -33,7 +33,7 @@ func BWLogger(config Config) {
 	}
 
 	// loop the functionality
-	ticker := time.NewTicker(time.Duration(config.Save*1000) * time.Millisecond)
+	ticker := time.NewTicker(time.Duration(config.Save) * time.Second)
 
 	for ; true; <-ticker.C {
 		config.SaveStats()
@@ -132,9 +132,9 @@ func LogToDB(path string, date string, rx int64, tx int64) error {
 	if err != nil {
 		return err
 	}
+	defer w.Close()
 
 	err = csv.NewWriter(w).WriteAll(rows)
-	w.Close()
 	if err != nil {
 		return err
 	}
