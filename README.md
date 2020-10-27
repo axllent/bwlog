@@ -9,7 +9,7 @@ both a live graph and statistics history for each interface.
 
 ## Usage options
 
-```shell
+```
 BWLog: A lightweight bandwidth logger
 
 Usage:
@@ -32,7 +32,7 @@ Flags:
 
 ## Installing
 
-Download a suitable binary for your system from the [releases](https://github.com/axllent/bwlog/releases) page.
+Download and extract suitable binary for your system from the [releases](https://github.com/axllent/bwlog/releases) page.
 
 
 ## Running BWLog
