@@ -9,31 +9,36 @@ both a live graph and statistics history for each interface.
 
 ## Usage options
 
-```shell
-Options:
-  -d string
-        database directory path
-  -i string
-        interfaces to monitor, comma separated eg: eth0,eth1
-  -l string
-        port to listen on (default "0.0.0.0:8080")
-  -p string
-        basic auth password file (must contain a single <user>:<pass>)
-  -s int
-        save to database every X seconds (default 60)
-  -sslcert string
-        Path to SSL certificate (must be used together with sslkey)
-  -sslkey string
-        Path to private SSL key (must be used together with sslcert)
-  -u    update to latest release
-  -v    show version number
 ```
+BWLog: A lightweight bandwidth logger
+
+Usage:
+  bwlog -i eth0 -d ~/bwlog/ [flags]
+  bwlog [command]
+
+Available Commands:
+  update      Update bwlog to the latest version
+  version     Display the app version & update information
+
+Flags:
+  -d, --database string     Database directory to save CSV files (default "./")
+  -i, --interfaces string   Interfaces to monitor, comma separated eg: eth0,eth1
+  -l, --listen string       Interface & port to listen on (default "0.0.0.0:8080")
+  -p, --password string     Auth password file (must contain a single "<user> <pass>")
+  -s, --save string         How often to save the database to disk. Examples: 30s, 5m, 1h (default "60s")
+      --sslcert string      SSL certificate (must be used together with --sslkey)
+      --sslkey string       SSL key (must be used together with --sslcert)
+```
+
+## Installing
+
+Download and extract suitable binary for your system from the [releases](https://github.com/axllent/bwlog/releases) page.
 
 
 ## Running BWLog
 
 ```shell
-bwlog -i eth0,docker0 -d ~/bwlog/ -p ~/bwlog/auth
+bwlog -i eth0 -d ~/bwlog/
 ```
 
 See `bwlog -h` for options.
@@ -53,12 +58,12 @@ Then just add `-p <password_file>` to your startup flags. BWLog does not handle 
 
 ## HTTPS
 
-To enable HTTPS you must use both the `-sslcert` and `-sslkey` options to specify the respective certificate files.
+To enable HTTPS you must use both the `--sslcert` and `--sslkey` options to specify the respective certificate files.
 
 
-## Compiling
+## Compiling from source
 
-Ensure you have `golang` and `make` installed, then just:
+Ensure you have `go` and `make` installed, then just:
 
 ```shell
 make
@@ -68,7 +73,7 @@ make
 ## Integrate with systemd
 
 BWLog does not have a background daemon. If you want bwlog to run automatically in the background then you can
-easily integrate this with systemd.
+easily integrate it with systemd.
 
 Create a file `/etc/systemd/system/bwlog.service`, ensuring sure you modify the  `ExecStart` to your requirements.
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0]
+
+- Complete rewrite to fix corrupted CSV data
+- Use `sync.Mutex` to prevent race conditions with interface syncing
+- Breaking change: `-sslcert` & `-sslkey` is now `--sslcert` & `--sslkey`
+- Add `version` and `update` sub-commands
+
+
 ## [0.2.5]
 
 - Switch to go mods
