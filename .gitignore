@@ -1,9 +1,8 @@
 /.vscode/
 /bin/
 /dist/
-/pkg/
-/src/
-/*-packr.go
+/db/
+*-packr.go
 bwlog
 *.db
 *.json
