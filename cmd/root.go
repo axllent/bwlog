@@ -77,8 +77,15 @@ func init() {
 
 	rootCmd.MarkFlagRequired("interfaces")
 
+	// hide `-h`
 	rootCmd.Flags().BoolP("help", "h", false, "override help so we can hide it")
 	rootCmd.Flags().MarkHidden("help")
+
+	// hide `help` subcommand
+	rootCmd.SetHelpCommand(&cobra.Command{
+		Use:    "no-help",
+		Hidden: true,
+	})
 }
 
 // initConfig reads in config file and ENV variables if set.
