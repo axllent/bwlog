@@ -1,6 +1,6 @@
 # Changelog
 
-## [dev]
+## [0.3.0]
 
 - Complete rewrite to fix corrupted CSV data
 - Use `sync.Mutex` to prevent race conditions with interface syncing
