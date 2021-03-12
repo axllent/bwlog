@@ -5,7 +5,7 @@ endif
 VERSION ?= "dev"
 LDFLAGS=-ldflags "-s -w -X github.com/axllent/bwlog/cmd.Version=${VERSION}"
 
-build = GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/bwlog_${VERSION}_$(1)_$(2) \
+build = GO386=softfloat GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/bwlog_${VERSION}_$(1)_$(2) \
 	&& bzip2 -f dist/bwlog_${VERSION}_$(1)_$(2)
 
 main-build: *.go
@@ -21,6 +21,7 @@ release:
 	go get github.com/gobuffalo/packr/packr
 	${GOPATH}/bin/packr
 	$(call build,darwin,amd64)
+	$(call build,darwin,arm64)
 	$(call build,freebsd,386)
 	$(call build,freebsd,amd64)
 	$(call build,freebsd,arm)
