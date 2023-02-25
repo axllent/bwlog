@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.4]
+## [0.3.1]
 
 - Update core modules
 
